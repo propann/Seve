@@ -21,6 +21,7 @@ Derniere mise a jour: 2026-02-28
 - Correction build TypeScript sur `lib/ai/mycelium-ai.ts`.
 - Correction build Prisma en Docker (`npx prisma generate` avant `next build`).
 - Correction build Resend (initialisation lazy si `RESEND_API_KEY` absent).
+- Hardening auth/session: parsing JSON robuste sur les flux profil/session (`safe-json`) pour eviter les 500 en cas de donnees corrompues.
 - Stabilisation lint pour code legacy/editorial (regles non bloquantes).
 - Refonte flux navigation utilisateur:
   - post-connexion/reconnexion -> `/garden` (plus de saut direct vers un cours)
@@ -29,12 +30,16 @@ Derniere mise a jour: 2026-02-28
 - Jardin transforme en page d'actualite principale:
   - hub central avec acces arbre, chat Mycelium et votes modules
   - retour au Jardin possible meme apres choix de graine
+- Fiabilisation infrastructure Coolify:
+  - routage `azoth.cloud` repointe vers le conteneur applicatif courant
+  - ancien conteneur app supprime apres bascule
+  - correctif seccomp applique sur les stacks Compose (`security_opt: seccomp=unconfined`)
+  - services Coolify/n8n/minio/postgres/redis revenus en `healthy`
 
 ## Risques connus
 
 - Warnings lint encore nombreux (notamment `no-unused-vars`, `no-img-element`, `any`).
-- Nginx host route actuellement vers l'IP interne du conteneur Coolify (`10.0.1.10:3000`).
-- Si Coolify recree le conteneur avec une nouvelle IP, il faudra mettre a jour le vhost Nginx.
+- La correction seccomp est appliquee dans les compose locaux (`/data/coolify/...`) et doit etre preservee en cas de regeneration des stacks.
 
 ## Prochaines priorites recommandees
 

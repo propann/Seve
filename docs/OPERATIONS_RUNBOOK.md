@@ -106,3 +106,34 @@ Checklist rapide:
 ```bash
 sudo bash -lc 'cd /data/coolify/proxy && docker compose up -d'
 ```
+
+## 8) Incident: services Docker en `unhealthy` a cause de seccomp (`SetSSB`)
+
+Symptome observe:
+- Plusieurs conteneurs apparaissent `unhealthy` alors que les services repondent.
+- `docker exec` echoue avec:
+  - `SetSSB requires libseccomp >= 2.5.0 and API level >= 4 (... API level: 1)`
+
+Cause:
+- Les healthchecks Docker bases sur `exec` echouent sur l'hote (seccomp/SSB), ce qui fausse l'etat de sante.
+
+Correction appliquee:
+- Ajouter dans les services Compose concernes:
+```yaml
+security_opt:
+  - seccomp=unconfined
+```
+- Puis recreer les stacks:
+```bash
+cd /data/coolify/source && docker compose -f docker-compose.prod.yml -f docker-compose.yml up -d
+cd /data/coolify/proxy && docker compose up -d
+cd /data/coolify/services/<service_id> && docker compose up -d
+cd /data/coolify/databases/<db_id> && docker compose up -d
+cd /data/coolify/applications/<app_id> && docker compose up -d
+```
+
+Validation:
+```bash
+sudo docker ps --format '{{.Names}}|{{.Status}}'
+```
+- Attendu: retour des statuts `healthy` pour les services avec healthcheck.
