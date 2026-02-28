@@ -6,12 +6,47 @@
 
 import { prisma } from '../db/prisma';
 
+type ResourceUser = {
+  id: string;
+  name: string;
+  inventory: string | null;
+  software: string | null;
+  email: string;
+};
+
+type CommunityResource = {
+  name: string;
+  id: string;
+  has: {
+    inventory: Record<string, number>;
+    software: string[];
+  };
+};
+
+function parseInventory(raw: string | null): Record<string, number> {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+
+function parseSoftware(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as string[];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * RÉSUMÉ DES RESSOURCES : 
  * Permet à l'IA de voir ce que la communauté possède globalement.
  */
-export async function getCommunityResources() {
-  const users = await prisma.user.findMany({
+export async function getCommunityResources(): Promise<CommunityResource[]> {
+  const users: ResourceUser[] = await prisma.user.findMany({
     select: {
       id: true,
       name: true,
@@ -21,12 +56,12 @@ export async function getCommunityResources() {
     }
   });
 
-  return users.map(u => ({
+  return users.map((u) => ({
     name: u.name,
     id: u.id,
     has: {
-      inventory: u.inventory ? JSON.parse(u.inventory) : {},
-      software: u.software ? JSON.parse(u.software) : []
+      inventory: parseInventory(u.inventory),
+      software: parseSoftware(u.software),
     }
   }));
 }
