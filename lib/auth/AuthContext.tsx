@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/lib/internal-auth';
 import { logoutUserAction } from '@/lib/actions/auth';
+import { parseJsonWithFallback } from '@/lib/safe-json';
 
 interface AuthContextType {
   user: User | null;
@@ -25,11 +26,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const hydrateSession = async () => {
       const savedUser = localStorage.getItem('arbre_session');
       if (savedUser) {
-        try {
-          if (active) setUser(JSON.parse(savedUser));
-        } catch (e) {
-          console.error("Erreur de parsing session:", e);
-        }
+        const parsedUser = parseJsonWithFallback<User | null>(savedUser, null);
+        if (active && parsedUser) setUser(parsedUser);
       }
 
       try {

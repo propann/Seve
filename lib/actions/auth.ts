@@ -5,6 +5,7 @@ import { prisma } from '../db/prisma';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createSessionToken } from '../session-token';
+import { isNumberRecord, isStringArray, parseJsonWithFallback } from '../safe-json';
 
 /**
  * ACTION SERVEUR : Inscription
@@ -77,8 +78,8 @@ export async function loginUserAction(email: string, passwordRaw: string) {
           level: userRecord.level,
           completedNodes: userRecord.completedNodes ? userRecord.completedNodes.split(',') : [],
           unlockedNodes: userRecord.unlockedNodes ? userRecord.unlockedNodes.split(',') : ["0.1"],
-          inventory: userRecord.inventory ? JSON.parse(userRecord.inventory) : {},
-          software: userRecord.software ? JSON.parse(userRecord.software) : []
+          inventory: parseJsonWithFallback(userRecord.inventory, {}, isNumberRecord),
+          software: parseJsonWithFallback(userRecord.software, [], isStringArray)
         }
       };
     }

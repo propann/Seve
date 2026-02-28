@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { parseJsonWithFallback } from "@/lib/safe-json";
 import Link from "next/link";
 import { Camera, Film, PenTool, Loader2, Terminal, TreePine, MessageCircle, BarChart3, ChevronRight, Lightbulb } from "lucide-react";
 import { cursus } from "@/lib/data/cursus";
@@ -50,6 +51,20 @@ interface CommunityProposal {
   createdAt: string;
 }
 
+function isCommunityProposalArray(value: unknown): value is CommunityProposal[] {
+  if (!Array.isArray(value)) return false;
+  return value.every((entry) => {
+    if (!entry || typeof entry !== "object") return false;
+    const proposal = entry as Record<string, unknown>;
+    return (
+      typeof proposal.id === "string" &&
+      typeof proposal.title === "string" &&
+      typeof proposal.objective === "string" &&
+      typeof proposal.createdAt === "string"
+    );
+  });
+}
+
 export function Garden({ selectedSeed }: GardenProps) {
   const [pendingSeed, setPendingSeed] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -75,20 +90,26 @@ export function Garden({ selectedSeed }: GardenProps) {
 
   useEffect(() => {
     if (!selectedSeed) return;
-    try {
-      const raw = window.localStorage.getItem(VOTE_STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as {
-        votes?: Record<string, number>;
-        votedByUser?: Record<string, boolean>;
-        communityProposals?: CommunityProposal[];
-      };
-      setVotes(parsed.votes || {});
-      setVotedByUser(parsed.votedByUser || {});
-      setCommunityProposals(parsed.communityProposals || []);
-    } catch {
-      // Ignore local parse errors.
-    }
+    const raw = window.localStorage.getItem(VOTE_STORAGE_KEY);
+    const parsed = parseJsonWithFallback<{
+      votes?: Record<string, number>;
+      votedByUser?: Record<string, boolean>;
+      communityProposals?: CommunityProposal[];
+    }>(raw, {});
+
+    const safeVotes =
+      parsed.votes && Object.values(parsed.votes).every((value) => typeof value === "number") ? parsed.votes : {};
+    const safeVotedByUser =
+      parsed.votedByUser && Object.values(parsed.votedByUser).every((value) => typeof value === "boolean")
+        ? parsed.votedByUser
+        : {};
+    const safeCommunityProposals = isCommunityProposalArray(parsed.communityProposals)
+      ? parsed.communityProposals
+      : [];
+
+    setVotes(safeVotes);
+    setVotedByUser(safeVotedByUser);
+    setCommunityProposals(safeCommunityProposals);
   }, [selectedSeed]);
 
   const selectSeed = async (seed: string) => {

@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from './db/prisma';
+import { isNumberRecord, isStringArray, parseJsonWithFallback } from './safe-json';
 
 export interface User {
   id: string;
@@ -72,8 +73,8 @@ export async function loginInternalUser(email: string, password: string): Promis
         level: userRecord.level,
         completedNodes: userRecord.completedNodes ? userRecord.completedNodes.split(',') : [],
         unlockedNodes: userRecord.unlockedNodes ? userRecord.unlockedNodes.split(',') : ["0.1"],
-        inventory: userRecord.inventory ? JSON.parse(userRecord.inventory) : {},
-        software: userRecord.software ? JSON.parse(userRecord.software) : []
+        inventory: parseJsonWithFallback(userRecord.inventory, {}, isNumberRecord),
+        software: parseJsonWithFallback(userRecord.software, [], isStringArray)
       };
     }
   } catch (error) {
