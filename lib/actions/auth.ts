@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createSessionToken } from '../session-token';
 import { isNumberRecord, isStringArray, parseJsonWithFallback } from '../safe-json';
+import { isLearningProfileData } from '../types/profile';
 
 /**
  * ACTION SERVEUR : Inscription
@@ -79,7 +80,8 @@ export async function loginUserAction(email: string, passwordRaw: string) {
           completedNodes: userRecord.completedNodes ? userRecord.completedNodes.split(',') : [],
           unlockedNodes: userRecord.unlockedNodes ? userRecord.unlockedNodes.split(',') : ["0.1"],
           inventory: parseJsonWithFallback(userRecord.inventory, {}, isNumberRecord),
-          software: parseJsonWithFallback(userRecord.software, [], isStringArray)
+          software: parseJsonWithFallback(userRecord.software, [], isStringArray),
+          profileData: parseJsonWithFallback(userRecord.profileData, {}, isLearningProfileData)
         }
       };
     }
@@ -118,6 +120,7 @@ export async function updateUserProfileAction(userId: string, data: any) {
         alignment: data.alignment,
         inventory: JSON.stringify(data.inventory),
         software: JSON.stringify(data.software),
+        profileData: JSON.stringify(data.profileData || {}),
       }
     });
     

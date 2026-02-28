@@ -34,9 +34,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { updateUserProfileAction } from "@/lib/actions/auth";
+import { CognitiveProfile, ExperienceLevel, LearningProfileData } from "@/lib/types/profile";
 
 interface PlayerProfileProps {
-  onComplete: (data: any) => void;
+  onComplete: (data: {
+    name: string;
+    characterClass: string;
+    profileData: LearningProfileData;
+  }) => void;
 }
 
 type OS = "mac" | "win" | "linux";
@@ -108,6 +113,16 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
   const [isScanning, setIsScanning] = useState(true);
 
   const [characterClass, setCharacterClass] = useState(user?.characterClass || "Novice");
+  const [age, setAge] = useState<number | "">(user?.profileData?.age ?? "");
+  const [cognitiveProfile, setCognitiveProfile] = useState<CognitiveProfile>(
+    user?.profileData?.cognitiveProfile || "operatoire"
+  );
+  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(
+    user?.profileData?.experienceLevel || "debutant"
+  );
+  const [weeklyHours, setWeeklyHours] = useState<number | "">(user?.profileData?.weeklyHours ?? "");
+  const [primaryGoal, setPrimaryGoal] = useState(user?.profileData?.primaryGoal || "");
+  const [notes, setNotes] = useState(user?.profileData?.notes || "");
 
   const relics = [
     ...CAMERA_DATABASE.numerique,
@@ -152,19 +167,33 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
     if (!user) return;
     setLoading(true);
     
-    const profileData = {
+    const profileData: LearningProfileData = {
+      age: age === "" ? null : age,
+      cognitiveProfile,
+      experienceLevel,
+      weeklyHours: weeklyHours === "" ? null : weeklyHours,
+      primaryGoal: primaryGoal.trim(),
+      notes: notes.trim(),
+    };
+
+    const payload = {
       name, avatar, os: selectedOS,
       inventory: inventory,
       software: Object.keys(grimoire).filter(k => grimoire[k]),
-      alignment, characterClass
+      alignment, characterClass,
+      profileData
     };
 
     try {
-      const result = await updateUserProfileAction(user.id, profileData);
+      const result = await updateUserProfileAction(user.id, payload);
       if (result && result.success) {
-        updateUser(profileData);
+        updateUser(payload);
         alert("Identité scellée !");
-        onComplete(profileData);
+        onComplete({
+          name,
+          characterClass,
+          profileData,
+        });
       } else {
         alert("Erreur de transmission.");
       }
@@ -270,6 +299,109 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
 
           {/* GRIMOIRE & SAUVEGARDE */}
           <div className="space-y-16">
+            <section className="space-y-8">
+              <h3 className="text-lg font-black text-white uppercase tracking-[0.5em] flex items-center gap-4">
+                <Cpu className="w-6 h-6 text-seve" /> Profil d&apos;Apprentissage
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="p-5 rounded-3xl border border-white/10 bg-white/[0.03] space-y-2">
+                  <span className="text-[10px] uppercase tracking-widest text-white/50 font-black">Age</span>
+                  <input
+                    type="number"
+                    min={7}
+                    max={99}
+                    value={age}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setAge(value === "" ? "" : Number(value));
+                    }}
+                    className="w-full bg-transparent border-b border-white/20 focus:border-seve outline-none py-2 text-white font-black"
+                    placeholder="ex: 24"
+                  />
+                </label>
+
+                <label className="p-5 rounded-3xl border border-white/10 bg-white/[0.03] space-y-2">
+                  <span className="text-[10px] uppercase tracking-widest text-white/50 font-black">Heures / semaine</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={60}
+                    value={weeklyHours}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setWeeklyHours(value === "" ? "" : Number(value));
+                    }}
+                    className="w-full bg-transparent border-b border-white/20 focus:border-seve outline-none py-2 text-white font-black"
+                    placeholder="ex: 6"
+                  />
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { id: "intuitif", label: "Cerveau Intuitif" },
+                  { id: "analytique", label: "Cerveau Analytique" },
+                  { id: "operatoire", label: "Cerveau Operatoire" },
+                ].map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => setCognitiveProfile(mode.id as CognitiveProfile)}
+                    className={`rounded-2xl border px-4 py-4 text-xs font-black uppercase tracking-widest transition-all ${
+                      cognitiveProfile === mode.id
+                        ? "bg-seve/20 border-seve text-seve"
+                        : "bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20"
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {[
+                  { id: "debutant", label: "Debutant" },
+                  { id: "intermediaire", label: "Intermediaire" },
+                  { id: "avance", label: "Avance" },
+                ].map((level) => (
+                  <button
+                    key={level.id}
+                    type="button"
+                    onClick={() => setExperienceLevel(level.id as ExperienceLevel)}
+                    className={`rounded-2xl border px-4 py-4 text-xs font-black uppercase tracking-widest transition-all ${
+                      experienceLevel === level.id
+                        ? "bg-seve/20 border-seve text-seve"
+                        : "bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20"
+                    }`}
+                  >
+                    {level.label}
+                  </button>
+                ))}
+              </div>
+
+              <label className="block p-5 rounded-3xl border border-white/10 bg-white/[0.03] space-y-2">
+                <span className="text-[10px] uppercase tracking-widest text-white/50 font-black">Objectif principal</span>
+                <input
+                  type="text"
+                  value={primaryGoal}
+                  onChange={(e) => setPrimaryGoal(e.target.value)}
+                  className="w-full bg-transparent border-b border-white/20 focus:border-seve outline-none py-2 text-white font-black"
+                  placeholder="ex: Maitriser le portrait documentaire"
+                />
+              </label>
+
+              <label className="block p-5 rounded-3xl border border-white/10 bg-white/[0.03] space-y-2">
+                <span className="text-[10px] uppercase tracking-widest text-white/50 font-black">Contexte personnel (optionnel)</span>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="w-full min-h-24 bg-transparent border border-white/10 rounded-2xl px-3 py-2 focus:border-seve outline-none text-white/90 text-sm"
+                  placeholder="contraintes, disponibilite, style prefere..."
+                />
+              </label>
+            </section>
+
             <section className="space-y-8">
               <h3 className="text-lg font-black text-white uppercase tracking-[0.5em] flex items-center gap-4">
                 <Layers className="w-6 h-6 text-seve" /> Grimoire Logiciel

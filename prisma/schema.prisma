@@ -24,6 +24,7 @@ model User {
   inventory      String?
   software       String?
   alignment      Int      @default(50)
+  profileData    String?  @map("profile_data")
   unlockedNodes  String   @default("0.1")
   completedNodes String   @default("")
   messages       Message[]

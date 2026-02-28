@@ -4,19 +4,25 @@ import React from "react";
 import { PlayerProfile } from "@/components/ui/PlayerProfile";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { useRouter } from "next/navigation";
+import { LearningProfileData } from "@/lib/types/profile";
 
 /**
  * PAGE RITUEL : L'espace de gestion de la fiche personnage
  */
 export default function RituelPage() {
   const router = useRouter();
-  const { user, updateUser } = useAuth();
+  const { updateUser } = useAuth();
 
-  const handleComplete = (profileData: any) => {
+  const handleComplete = (profileData: {
+    name: string;
+    characterClass: string;
+    profileData: LearningProfileData;
+  }) => {
     // Mise à jour de la session locale
     updateUser({
         name: profileData.name,
-        characterClass: profileData.characterClass
+        characterClass: profileData.characterClass,
+        profileData: profileData.profileData,
     });
     // Redirection vers le dashboard après sauvegarde
     router.push("/dashboard");

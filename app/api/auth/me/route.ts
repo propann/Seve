@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/session-token";
 import { prisma } from "@/lib/db/prisma";
 import { isNumberRecord, isStringArray, parseJsonWithFallback } from "@/lib/safe-json";
+import { isLearningProfileData } from "@/lib/types/profile";
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -38,6 +39,7 @@ export async function GET() {
       unlockedNodes: userRecord.unlockedNodes ? userRecord.unlockedNodes.split(",") : ["0.1"],
       inventory: parseJsonWithFallback(userRecord.inventory, {}, isNumberRecord),
       software: parseJsonWithFallback(userRecord.software, [], isStringArray),
+      profileData: parseJsonWithFallback(userRecord.profileData, {}, isLearningProfileData),
     },
   });
 }
