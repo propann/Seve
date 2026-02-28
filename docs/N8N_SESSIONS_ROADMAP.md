@@ -80,7 +80,7 @@ Regles appliquees dans les workflows:
 
 ## Sequence de mise en place
 
-1. Importer les deux workflows templates du dossier `n8n/workflows`.
+1. Importer les quatre workflows templates du dossier `n8n/workflows`.
 2. Configurer les chemins webhook definitifs (prod + staging).
 3. Ajouter authentification webhook (secret header ou token query).
 4. Brancher stockages cibles (Postgres, Airtable, Sheets, S3, etc.).

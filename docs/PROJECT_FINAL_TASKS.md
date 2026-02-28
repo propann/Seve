@@ -75,6 +75,8 @@ Format de presentation obligatoire (template v1):
 - [ ] Ajouter tests sur routes API n8n/profil
 - [ ] CI obligatoire: lint + build + tests avant merge
 - [ ] Revue accessibilite (contraste, focus, clavier)
+- [ ] Reconciler l historique Prisma pour Postgres (retirer lock legacy sqlite)
+- [ ] Ajouter procedure standard de migration DB (plus de correctifs SQL manuels)
 
 ## 8) Mise en production finale
 

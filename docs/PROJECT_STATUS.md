@@ -18,6 +18,12 @@ Derniere mise a jour: 2026-02-28
 
 ## Correctifs recents majeurs
 
+- Stabilisation auth deconnexion/reconnexion:
+  - migration des flux `/auth/sign-in` et `/auth/sign-up` vers routes API (`/api/auth/login`, `/api/auth/signup`)
+  - ajout route API logout (`/api/auth/logout`)
+  - suppression de la dependance critique aux Server Actions pour le cycle login/logout
+- Correction incident prod login Prisma (`P2022`):
+  - colonne manquante `User.profile_data` ajoutee en base via SQL de remediation
 - Correction build TypeScript sur `lib/ai/mycelium-ai.ts`.
 - Correction build Prisma en Docker (`npx prisma generate` avant `next build`).
 - Correction build Resend (initialisation lazy si `RESEND_API_KEY` absent).
@@ -47,6 +53,9 @@ Derniere mise a jour: 2026-02-28
 
 - Warnings lint encore nombreux (notamment `no-unused-vars`, `no-img-element`, `any`).
 - La correction seccomp est appliquee dans les compose locaux (`/data/coolify/...`) et doit etre preservee en cas de regeneration des stacks.
+- Dette migration Prisma:
+  - historique migrations legacy non aligne (`migration_lock.toml` en `sqlite` vs DB `postgresql`)
+  - `prisma migrate deploy` non utilisable tel quel tant que l historique n est pas reconcilie
 
 ## Prochaines priorites recommandees
 
@@ -55,3 +64,5 @@ Derniere mise a jour: 2026-02-28
 3. Ajouter tests automatiques minimum sur auth/session/routes API.
 4. Mettre en place CI (lint + build + tests) avant merge sur `main`.
 5. Piloter la cloture projet via le backlog unique: [PROJECT_FINAL_TASKS.md](/home/azoth/web/docs/PROJECT_FINAL_TASKS.md).
+6. Reconciliation propre des migrations Prisma Postgres (supprimer le besoin de hotfix SQL manuel).
+7. Contexte de passation IA: [AI_COLLAB_CONTEXT.md](/home/azoth/web/docs/AI_COLLAB_CONTEXT.md).
