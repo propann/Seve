@@ -1,0 +1,7 @@
+{
+  "type": "seed_selected",
+  "messageId": "msg-system-002",
+  "email": "seedtest@example.com",
+  "userName": "Seed Test",
+  "seed": "photographie"
+}

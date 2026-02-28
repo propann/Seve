@@ -7,6 +7,7 @@
    - pedago: `https://pedago.azoth.cloud`
 2. `Workflows -> Import from File`.
 3. Importer le JSON correspondant au dossier.
+4. Verifier la reference [IMPORT_INDEX.md](/home/azoth/web/n8n/workflows/IMPORT_INDEX.md).
 
 ## 2) Parametrage minimal
 
@@ -29,6 +30,25 @@ Valider:
 - reponse HTTP 200
 - `status=accepted`
 - champs attendus (`eventType`, `nextAction`, `coachReply`)
+
+Commande test recommandee:
+
+```bash
+cd /home/azoth/web/n8n/workflows/scripts
+SYSTEM_BASE_URL="https://n8n.azoth.cloud" \
+PEDAGO_BASE_URL="https://pedago.azoth.cloud" \
+./test-webhooks.sh
+```
+
+Si webhook protege:
+
+```bash
+cd /home/azoth/web/n8n/workflows/scripts
+SYSTEM_BASE_URL="https://n8n.azoth.cloud" \
+PEDAGO_BASE_URL="https://pedago.azoth.cloud" \
+WEBHOOK_SECRET="replace-me" \
+./test-webhooks.sh
+```
 
 ## 4) Passage en production
 

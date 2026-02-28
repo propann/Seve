@@ -11,6 +11,9 @@ Ce dossier est dedie aux assets n8n versionnes dans Git:
 - `workflows/system/`: workflows pour la session `n8n.azoth.cloud`
 - `workflows/pedago/`: workflows pour la session `pedago.azoth.cloud`
 - `workflows/IMPORT_CHECKLIST.md`: procedure d'import et validation
+- `workflows/IMPORT_INDEX.md`: index source-of-truth des fichiers a importer
+- `workflows/payloads/`: payloads JSON de validation post-import
+- `workflows/scripts/test-webhooks.sh`: script de test webhook systeme + pedago
 
 ## Convention de nommage
 

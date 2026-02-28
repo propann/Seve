@@ -1,0 +1,9 @@
+{
+  "type": "exercise_submission",
+  "messageId": "msg-pedago-002",
+  "userName": "learner_one",
+  "courseId": "m1-2",
+  "exerciseId": "expo-01",
+  "assetUrl": "https://s3.azoth.cloud/seve/exercises/expo-01.jpg",
+  "notes": "Test exposition avec contre-jour"
+}
