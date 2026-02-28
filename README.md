@@ -2,6 +2,13 @@
 
 Frontend principal servi sur `azoth.cloud`.
 
+## Documentation projet
+
+- Statut/avancement: `docs/PROJECT_STATUS.md`
+- Runbook production: `docs/OPERATIONS_RUNBOOK.md`
+- Reseau et architecture: `docs/RESEAU.md`
+- Contribution Git: `CONTRIBUTING.md`
+
 ## Fonctionnalités clés
 
 - Portail d'entrée immersif (landing plein écran)
@@ -29,6 +36,17 @@ npm run dev
 ```
 
 Application locale: `http://localhost:3000`
+
+## Qualité et checks
+
+```bash
+npm run lint
+npm run build -- --webpack
+```
+
+Notes:
+- Le lint est configuré pour ne pas bloquer sur certains warnings legacy (contenu éditorial/UI).
+- Le build de référence pour CI/prod est `next build --webpack`.
 
 ## Build production
 
@@ -70,3 +88,11 @@ Ce projet est prêt pour un déploiement conteneurisé via Coolify:
 7. Activer l'auto-deploy sur `push` (webhook Git).
 
 Chaque `git push` sur la branche configurée déclenche un nouveau build et déploiement automatique.
+
+## Structure du dépôt
+
+- `app/`: routes Next.js App Router
+- `components/`: UI et composants interactifs
+- `lib/`: logique métier (auth, DB, services externes)
+- `prisma/`: schéma et migrations
+- `docs/`: runbooks et suivi projet
