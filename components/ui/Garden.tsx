@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Camera, Film, PenTool, Loader2, Terminal, TreePine, MessageCircle, BarChart3, ChevronRight } from "lucide-react";
+import { Camera, Film, PenTool, Loader2, Terminal, TreePine, MessageCircle, BarChart3, ChevronRight, Lightbulb } from "lucide-react";
 import { cursus } from "@/lib/data/cursus";
 import { MyceliumChat } from "@/components/ui/MyceliumChat";
 
@@ -43,11 +43,22 @@ interface GardenProps {
 
 const VOTE_STORAGE_KEY = "arbre:garden:votes:v1";
 
+interface CommunityProposal {
+  id: string;
+  title: string;
+  objective: string;
+  createdAt: string;
+}
+
 export function Garden({ selectedSeed }: GardenProps) {
   const [pendingSeed, setPendingSeed] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [votedByUser, setVotedByUser] = useState<Record<string, boolean>>({});
+  const [communityProposals, setCommunityProposals] = useState<CommunityProposal[]>([]);
+  const [proposalTitle, setProposalTitle] = useState("");
+  const [proposalObjective, setProposalObjective] = useState("");
+  const [proposalMessage, setProposalMessage] = useState("");
 
   const moduleOptions = useMemo(
     () =>
@@ -56,6 +67,7 @@ export function Garden({ selectedSeed }: GardenProps) {
           id: module.id,
           title: module.title,
           objective: module.objective,
+          source: "official" as const,
         }))
       ),
     []
@@ -66,9 +78,14 @@ export function Garden({ selectedSeed }: GardenProps) {
     try {
       const raw = window.localStorage.getItem(VOTE_STORAGE_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as { votes?: Record<string, number>; votedByUser?: Record<string, boolean> };
+      const parsed = JSON.parse(raw) as {
+        votes?: Record<string, number>;
+        votedByUser?: Record<string, boolean>;
+        communityProposals?: CommunityProposal[];
+      };
       setVotes(parsed.votes || {});
       setVotedByUser(parsed.votedByUser || {});
+      setCommunityProposals(parsed.communityProposals || []);
     } catch {
       // Ignore local parse errors.
     }
@@ -111,14 +128,63 @@ export function Garden({ selectedSeed }: GardenProps) {
 
     window.localStorage.setItem(
       VOTE_STORAGE_KEY,
-      JSON.stringify({ votes: nextVotes, votedByUser: nextVotedByUser })
+      JSON.stringify({ votes: nextVotes, votedByUser: nextVotedByUser, communityProposals })
     );
   };
 
   if (selectedSeed) {
-    const rankedModules = [...moduleOptions]
+    const communityModules = communityProposals.map((proposal) => ({
+      id: proposal.id,
+      title: proposal.title,
+      objective: proposal.objective,
+      source: "community" as const,
+    }));
+
+    const rankedModules = [...moduleOptions, ...communityModules]
       .sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0))
-      .slice(0, 8);
+      .slice(0, 12);
+
+    const submitProposal = () => {
+      setProposalMessage("");
+      const cleanTitle = proposalTitle.trim();
+      const cleanObjective = proposalObjective.trim();
+
+      if (cleanTitle.length < 6) {
+        setProposalMessage("Titre trop court (6 caracteres minimum).");
+        return;
+      }
+      if (cleanObjective.length < 12) {
+        setProposalMessage("Description trop courte (12 caracteres minimum).");
+        return;
+      }
+
+      const proposal: CommunityProposal = {
+        id: `P.${Date.now()}`,
+        title: cleanTitle,
+        objective: cleanObjective,
+        createdAt: new Date().toISOString(),
+      };
+
+      const nextCommunityProposals = [proposal, ...communityProposals].slice(0, 20);
+      const nextVotes = { ...votes, [proposal.id]: 0 };
+      const nextVotedByUser = { ...votedByUser, [proposal.id]: false };
+
+      setCommunityProposals(nextCommunityProposals);
+      setVotes(nextVotes);
+      setVotedByUser(nextVotedByUser);
+      setProposalTitle("");
+      setProposalObjective("");
+      setProposalMessage("Proposition ajoutee au vote communautaire.");
+
+      window.localStorage.setItem(
+        VOTE_STORAGE_KEY,
+        JSON.stringify({
+          votes: nextVotes,
+          votedByUser: nextVotedByUser,
+          communityProposals: nextCommunityProposals,
+        })
+      );
+    };
 
     return (
       <div className="w-full max-w-6xl space-y-10">
@@ -131,7 +197,7 @@ export function Garden({ selectedSeed }: GardenProps) {
           </p>
         </header>
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link
             href="/dashboard"
             className="rounded-2xl border border-seve/20 bg-seve/10 p-5 hover:bg-seve/15 transition-all"
@@ -155,6 +221,60 @@ export function Garden({ selectedSeed }: GardenProps) {
             <h2 className="text-white font-black uppercase text-sm">Votes actifs</h2>
             <p className="text-white/60 text-xs mt-2">Priorisez les prochains modules a approfondir</p>
           </div>
+
+          <Link
+            href="/garden/outils/creation-cours"
+            className="rounded-2xl border border-amberGlow/25 bg-amberGlow/5 p-5 hover:bg-amberGlow/10 transition-all"
+          >
+            <Lightbulb className="w-6 h-6 text-amberGlow mb-3" />
+            <h2 className="text-white font-black uppercase text-sm">Outil creation</h2>
+            <p className="text-white/60 text-xs mt-2">La fabrique de cours arrive bientot</p>
+          </Link>
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8 space-y-5">
+          <div className="space-y-2">
+            <h3 className="text-white text-xl md:text-2xl font-black uppercase">Proposer un cours</h3>
+            <p className="text-white/50 text-xs uppercase tracking-widest">
+              Votre idee est publiee dans les votes de la communaute
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input
+              value={proposalTitle}
+              onChange={(e) => setProposalTitle(e.target.value)}
+              placeholder="Titre du cours propose"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-seve"
+            />
+            <input
+              value={proposalObjective}
+              onChange={(e) => setProposalObjective(e.target.value)}
+              placeholder="Objectif ou valeur pour la communaute"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-seve"
+            />
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-3 md:items-center">
+            <button
+              type="button"
+              onClick={submitProposal}
+              className="inline-flex items-center justify-center rounded-2xl border border-seve/30 bg-seve/15 px-5 py-3 text-seve font-black uppercase text-xs tracking-widest hover:bg-seve/20 transition-all"
+            >
+              Soumettre au vote
+            </button>
+            <Link
+              href="/garden/outils/creation-cours"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.03] px-5 py-3 text-white/80 font-black uppercase text-xs tracking-widest hover:border-white/25"
+            >
+              Voir l'outil de creation (bientot)
+            </Link>
+          </div>
+
+          <p className="text-[11px] text-white/45">
+            L'outil complet de creation de cours arrive bientot. Pour l'instant, vous pouvez proposer un sujet puis mobiliser la communaute via les votes.
+          </p>
+          {proposalMessage && <p className="text-[11px] text-seve">{proposalMessage}</p>}
         </section>
 
         <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8">
@@ -189,6 +309,9 @@ export function Garden({ selectedSeed }: GardenProps) {
                       <p className="text-[10px] uppercase tracking-widest text-white/40">{module.id}</p>
                       <h4 className="text-sm font-black text-white uppercase mt-2">{module.title}</h4>
                       <p className="text-xs text-white/60 mt-2">{module.objective}</p>
+                      {module.source === "community" && (
+                        <p className="mt-2 text-[10px] uppercase tracking-widest text-amberGlow">Proposition communaute</p>
+                      )}
                     </div>
                     <div className="text-right min-w-16">
                       <p className="text-seve text-2xl font-black leading-none">{score}</p>

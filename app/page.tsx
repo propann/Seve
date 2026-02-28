@@ -36,6 +36,15 @@ export default function HomePage() {
           <p className="max-w-xl text-white/65 text-base md:text-lg [font-family:Georgia,serif]">
             Un tunnel immersif pour apprendre tout type de discipline. Connectez-vous, choisissez votre graine, puis entrez dans votre parcours.
           </p>
+          <div className="max-w-xl rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-2">
+            <p className="text-[10px] text-seve uppercase tracking-[0.28em] font-black">Votre role</p>
+            <p className="text-sm text-white/80">
+              Vous n&apos;etes pas seulement eleve: vous etes aussi co-constructeur du Jardin.
+            </p>
+            <p className="text-xs text-white/60">
+              Apprenez les modules, proposez de nouveaux cours et votez avec la communaute pour orienter les prochaines graines integrees a la plateforme.
+            </p>
+          </div>
         </section>
         <div className="flex justify-center lg:justify-end">
           <AuthForm />

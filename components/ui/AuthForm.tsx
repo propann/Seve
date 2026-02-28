@@ -101,6 +101,13 @@ export function AuthForm() {
         </button>
       </div>
 
+      <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+        <p className="text-[10px] uppercase tracking-[0.25em] font-black text-seve">Mission utilisateur</p>
+        <p className="mt-2 text-xs text-white/70">
+          Depuis le Jardin, vous suivez votre parcours, proposez des nouveaux cours et participez aux votes communautaires.
+        </p>
+      </div>
+
       <AnimatePresence mode="wait">
         {mode === "login" ? (
           <motion.form
