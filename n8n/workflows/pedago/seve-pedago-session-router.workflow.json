@@ -1,0 +1,81 @@
+{
+  "name": "SEVE - PEDAGO - Session Router",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seve/pedago/session-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "Webhook_Pedago_In",
+      "name": "Webhook Pedago In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst eventType = (body.type ?? 'unknown').toString().toLowerCase();\n\nlet nextAction = 'coach_reply';\nlet coachReply = 'Message recu. Le guide pedagogique prepare une reponse detaillee.';\n\nif (eventType === 'exercise_submission') {\n  nextAction = 'exercise_review';\n  coachReply = 'Exercice recu. Analyse technique et artistique en cours.';\n} else if (eventType === 'chat_message') {\n  nextAction = 'micro_coaching';\n  coachReply = 'Question recue. Voici une piste: avancez pas a pas et testez sur une image concrete.';\n} else if (eventType === 'course_proposal') {\n  nextAction = 'curriculum_triage';\n  coachReply = 'Proposition pedagogique enregistree. Elle passe en priorisation communautaire.';\n}\n\nreturn [{\n  json: {\n    status: 'accepted',\n    session: 'pedago',\n    eventType,\n    nextAction,\n    coachReply,\n    receivedAt: new Date().toISOString(),\n    raw: body\n  }\n}];"
+      },
+      "id": "Code_Normalize_Pedago_Event",
+      "name": "Normalize Pedago Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "Respond_Pedago_Ack",
+      "name": "Respond Pedago Ack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Pedago In": {
+      "main": [
+        [
+          {
+            "node": "Normalize Pedago Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Pedago Event": {
+      "main": [
+        [
+          {
+            "node": "Respond Pedago Ack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "template": "seve-pedago-session-router-v1"
+  }
+}

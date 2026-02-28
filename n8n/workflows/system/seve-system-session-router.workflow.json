@@ -1,0 +1,81 @@
+{
+  "name": "SEVE - SYSTEM - Session Router",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seve/system/session-events",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "Webhook_System_In",
+      "name": "Webhook System In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst rawType = (body.type ?? 'unknown').toString().toLowerCase();\nconst allowed = ['chat_message', 'auth_signup', 'auth_login', 'seed_selected', 'course_proposal', 'course_vote'];\nconst eventType = allowed.includes(rawType) ? rawType : 'unknown';\n\nlet priority = 'low';\nif (eventType === 'auth_signup' || eventType === 'course_proposal') priority = 'medium';\nif (eventType === 'unknown') priority = 'high';\n\nreturn [{\n  json: {\n    status: 'accepted',\n    session: 'system',\n    eventType,\n    priority,\n    receivedAt: new Date().toISOString(),\n    audit: {\n      userName: body.userName ?? body.email ?? 'anonymous',\n      room: body.room ?? null,\n      messageId: body.messageId ?? null\n    },\n    raw: body\n  }\n}];"
+      },
+      "id": "Code_Normalize_System_Event",
+      "name": "Normalize System Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "Respond_System_Ack",
+      "name": "Respond System Ack",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook System In": {
+      "main": [
+        [
+          {
+            "node": "Normalize System Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize System Event": {
+      "main": [
+        [
+          {
+            "node": "Respond System Ack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "template": "seve-system-session-router-v1"
+  }
+}

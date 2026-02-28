@@ -7,6 +7,7 @@ Frontend principal servi sur `azoth.cloud`.
 - Statut/avancement: `docs/PROJECT_STATUS.md`
 - Runbook production: `docs/OPERATIONS_RUNBOOK.md`
 - Reseau et architecture: `docs/RESEAU.md`
+- Plan n8n (sessions systeme/pedago): `docs/N8N_SESSIONS_ROADMAP.md`
 - Contribution Git: `CONTRIBUTING.md`
 
 ## Fonctionnalités clés
@@ -104,4 +105,5 @@ Chaque `git push` sur la branche configurée déclenche un nouveau build et dép
 - `components/`: UI et composants interactifs
 - `lib/`: logique métier (auth, DB, services externes)
 - `prisma/`: schéma et migrations
+- `n8n/`: templates importables et checklist workflows
 - `docs/`: runbooks et suivi projet
