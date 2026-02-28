@@ -7,6 +7,8 @@ import {
   FlaskConical as Flask, 
   Camera, 
   Smartphone, 
+  Film,
+  PenTool,
   Layers, 
   Cpu, 
   Wind,
@@ -19,22 +21,19 @@ import {
   Terminal as LinuxIcon,
   MousePointer2,
   Sun,
-  Aperture,
   Lightbulb,
   Combine,
   Plus,
   Minus,
-  Binary,
   Printer,
-  Scaling,
   Focus,
   Gem,
-  Coins,
+  Server,
   ShieldCheck
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { updateUserProfileAction } from "@/lib/actions/auth";
-import { CognitiveProfile, ExperienceLevel, LearningProfileData } from "@/lib/types/profile";
+import { CognitiveProfile, ExperienceLevel, LearningProfileData, SeedEquipmentMap, SeedKey } from "@/lib/types/profile";
 
 interface PlayerProfileProps {
   onComplete: (data: {
@@ -70,41 +69,104 @@ const SOFTWARE_DATABASE = {
   ]
 };
 
-const CAMERA_DATABASE = {
-  numerique: [
+const SEED_LABELS: Record<SeedKey, string> = {
+  photographie: "Photographie",
+  cinema: "Cinema",
+  design: "Dessin",
+  linux: "Linux",
+};
+
+const SEED_EQUIPMENT_CATALOG: Record<SeedKey, Array<{ id: string; label: string; icon: React.ComponentType<{ className?: string }> }>> = {
+  photographie: [
     { id: "mirrorless", label: "Hybride", icon: Camera },
     { id: "dslr", label: "Reflex", icon: Camera },
     { id: "smartphone_pro", label: "Smartphone Pro", icon: Smartphone },
-    { id: "digital_back", label: "Dos Numérique", icon: Layout },
-  ],
-  argentique: [
     { id: "analog_35", label: "Format 35mm", icon: Flask },
-    { id: "analog_mf", label: "Moyen Format", icon: Box },
-    { id: "chambre", label: "Chambre Technique", icon: Layout },
-    { id: "instant", label: "Instantané", icon: Zap },
-  ]
+    { id: "tripod", label: "Trepied", icon: Box },
+    { id: "filters", label: "Filtres", icon: Sun },
+    { id: "flash_cobra", label: "Flash Cobra", icon: Zap },
+    { id: "studio_light", label: "Eclairage Studio", icon: Lightbulb },
+    { id: "scanner", label: "Scanner Negatifs", icon: Monitor },
+    { id: "printer", label: "Imprimante Photo", icon: Printer },
+  ],
+  cinema: [
+    { id: "cinema_camera", label: "Camera Cinema", icon: Film },
+    { id: "camera_rig", label: "Rig Camera", icon: Camera },
+    { id: "gimbal", label: "Gimbal", icon: Wind },
+    { id: "shotgun_mic", label: "Micro Shotgun", icon: Monitor },
+    { id: "audio_recorder", label: "Enregistreur Audio", icon: Box },
+    { id: "led_panel", label: "Panneau LED", icon: Lightbulb },
+    { id: "video_tripod", label: "Trepied Video", icon: Focus },
+    { id: "clap", label: "Clap", icon: Film },
+  ],
+  design: [
+    { id: "graphic_tablet", label: "Tablette Graphique", icon: PenTool },
+    { id: "stylus_pro", label: "Stylet Pro", icon: MousePointer2 },
+    { id: "color_calibration", label: "Sonde Colorimetrique", icon: Sun },
+    { id: "drawing_screen", label: "Ecran de Dessin", icon: Monitor },
+    { id: "scanner_a3", label: "Scanner A3", icon: Box },
+    { id: "printer_art", label: "Imprimante Art", icon: Printer },
+    { id: "light_table", label: "Table Lumineuse", icon: Lightbulb },
+    { id: "cutting_tools", label: "Outils de Coupe", icon: Combine },
+  ],
+  linux: [
+    { id: "linux_laptop", label: "Laptop Linux", icon: LinuxIcon },
+    { id: "home_server", label: "Serveur Maison", icon: Server },
+    { id: "raspberry_pi", label: "Raspberry Pi", icon: Box },
+    { id: "network_switch", label: "Switch Reseau", icon: Combine },
+    { id: "external_ssd", label: "SSD Externe", icon: Layout },
+    { id: "second_monitor", label: "Second Ecran", icon: Monitor },
+    { id: "backup_nas", label: "NAS", icon: Box },
+    { id: "lab_keyboard", label: "Clavier labo", icon: MousePointer2 },
+  ],
 };
 
-const ACCESSORIES_DATABASE = [
-  { id: "tripod", label: "Trépied", icon: Box },
-  { id: "filters", label: "Filtres", icon: Sun },
-  { id: "flash_cobra", label: "Flash Cobra", icon: Zap },
-  { id: "studio_light", label: "Éclairage Studio", icon: Lightbulb },
-  { id: "scanner", label: "Scanner Négatifs", icon: Monitor },
-  { id: "enlarger", label: "Agrandisseur Labo", icon: Focus },
-  { id: "lab_tanks", label: "Cuves de dév.", icon: Flask },
-  { id: "calibration", label: "Sonde Calibration", icon: MousePointer2 },
-  { id: "printer", label: "Imprimante Photo", icon: Printer },
-  { id: "drone", label: "Drone Aérien", icon: Wind },
-];
+function buildInitialSeedEquipment(userInventory: Record<string, number>, fromProfile?: SeedEquipmentMap): SeedEquipmentMap {
+  const seedEquipment: SeedEquipmentMap = {
+    photographie: {},
+    cinema: {},
+    design: {},
+    linux: {},
+  };
+
+  if (fromProfile) {
+    (Object.keys(SEED_EQUIPMENT_CATALOG) as SeedKey[]).forEach((seed) => {
+      seedEquipment[seed] = { ...(fromProfile[seed] || {}) };
+    });
+    return seedEquipment;
+  }
+
+  // Migration douce des anciens profils: l'ancien inventaire etait orienté photo.
+  SEED_EQUIPMENT_CATALOG.photographie.forEach((item) => {
+    const qty = userInventory[item.id] || 0;
+    if (qty > 0) {
+      seedEquipment.photographie = { ...seedEquipment.photographie, [item.id]: qty };
+    }
+  });
+
+  return seedEquipment;
+}
+
+function aggregateSeedInventory(seedEquipment: SeedEquipmentMap): Record<string, number> {
+  const merged: Record<string, number> = {};
+  (Object.keys(SEED_EQUIPMENT_CATALOG) as SeedKey[]).forEach((seed) => {
+    const inv = seedEquipment[seed] || {};
+    Object.entries(inv).forEach(([id, qty]) => {
+      merged[id] = (merged[id] || 0) + Math.max(0, qty || 0);
+    });
+  });
+  return merged;
+}
 
 export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
   const { user, updateUser } = useAuth();
   const [name, setName] = useState(user?.name || "Explorateur");
   const [avatar, setAvatar] = useState<string | null>(user?.avatar || null);
   const [selectedOS, setSelectedOS] = useState<OS>((user?.os as OS) || "mac");
-  
-  const [inventory, setInventory] = useState<Record<string, number>>(user?.inventory || {});
+  const [activeSeedTab, setActiveSeedTab] = useState<SeedKey>((user?.selectedSeed as SeedKey) || "photographie");
+  const [seedEquipment, setSeedEquipment] = useState<SeedEquipmentMap>(
+    buildInitialSeedEquipment(user?.inventory || {}, user?.profileData?.seedEquipment)
+  );
   const [grimoire, setGrimoire] = useState<Record<string, boolean>>(
     user?.software ? user.software.reduce((acc: any, cur: string) => ({ ...acc, [cur]: true }), {}) : {}
   );
@@ -123,12 +185,13 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
   const [weeklyHours, setWeeklyHours] = useState<number | "">(user?.profileData?.weeklyHours ?? "");
   const [primaryGoal, setPrimaryGoal] = useState(user?.profileData?.primaryGoal || "");
   const [notes, setNotes] = useState(user?.profileData?.notes || "");
+  const inventory = aggregateSeedInventory(seedEquipment);
 
-  const relics = [
-    ...CAMERA_DATABASE.numerique,
-    ...CAMERA_DATABASE.argentique,
-    ...ACCESSORIES_DATABASE
-  ].filter(item => (inventory[item.id] || 0) > 0);
+  const relics = (Object.keys(SEED_EQUIPMENT_CATALOG) as SeedKey[]).flatMap((seed) =>
+    SEED_EQUIPMENT_CATALOG[seed]
+      .filter((item) => (seedEquipment[seed]?.[item.id] || 0) > 0)
+      .map((item) => ({ ...item, seed }))
+  );
 
   useEffect(() => {
     const hasAnalog = (inventory.analog_35 || 0) + (inventory.analog_mf || 0) + (inventory.chambre || 0) > 0;
@@ -155,8 +218,17 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
     }
   };
 
-  const adjustQuantity = (id: string, delta: number) => {
-    setInventory(prev => ({ ...prev, [id]: Math.max(0, (prev[id] || 0) + delta) }));
+  const adjustSeedQuantity = (seed: SeedKey, id: string, delta: number) => {
+    setSeedEquipment((prev) => {
+      const seedInv = prev[seed] || {};
+      return {
+        ...prev,
+        [seed]: {
+          ...seedInv,
+          [id]: Math.max(0, (seedInv[id] || 0) + delta),
+        },
+      };
+    });
   };
 
   const toggleSoftware = (id: string) => {
@@ -174,11 +246,12 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
       weeklyHours: weeklyHours === "" ? null : weeklyHours,
       primaryGoal: primaryGoal.trim(),
       notes: notes.trim(),
+      seedEquipment,
     };
 
     const payload = {
       name, avatar, os: selectedOS,
-      inventory: inventory,
+      inventory,
       software: Object.keys(grimoire).filter(k => grimoire[k]),
       alignment, characterClass,
       profileData
@@ -251,12 +324,13 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
             <div className="flex flex-wrap gap-4">
               {relics.map(relic => (
                 <motion.div 
-                  key={relic.id} initial={{ scale: 0 }} animate={{ scale: 1 }}
+                  key={`${relic.seed}-${relic.id}`} initial={{ scale: 0 }} animate={{ scale: 1 }}
                   className="flex items-center gap-3 px-5 py-3 bg-black/40 border border-seve/20 rounded-2xl shadow-xl"
                 >
                   <relic.icon className="w-4 h-4 text-seve" />
                   <span className="text-xs font-bold uppercase text-white/90">{relic.label}</span>
-                  <span className="text-sm font-black text-seve ml-2 bg-seve/10 px-2 rounded-lg">x{inventory[relic.id]}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-white/45">{SEED_LABELS[relic.seed]}</span>
+                  <span className="text-sm font-black text-seve ml-2 bg-seve/10 px-2 rounded-lg">x{seedEquipment[relic.seed]?.[relic.id] || 0}</span>
                 </motion.div>
               ))}
             </div>
@@ -268,33 +342,54 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
           <div className="space-y-16">
             <div className="space-y-4">
                 <h3 className="text-lg font-black text-white uppercase tracking-[0.5em] flex items-center gap-4">
-                    <Combine className="w-6 h-6 text-seve" /> Recensement Physique
+                    <Combine className="w-6 h-6 text-seve" /> Materiel par Graine
                 </h3>
-                <p className="text-xs text-textMain/40 uppercase italic">Précisez vos ressources pour le Mycélium d'entraide</p>
+                <p className="text-xs text-textMain/40 uppercase italic">Un onglet par graine pour mapper le materiel aux cours</p>
             </div>
 
-            {Object.entries(CAMERA_DATABASE).map(([category, items]) => (
-              <div key={category} className="space-y-6">
-                <h4 className="text-xs font-black text-white/60 uppercase tracking-widest ml-2 flex items-center gap-3 border-l-2 border-seve pl-4">
-                    Section {category}
-                </h4>
-                <div className="grid grid-cols-1 gap-3">
-                  {items.map(item => (
-                    <div key={item.id} className={`flex items-center justify-between p-6 rounded-[32px] border transition-all ${inventory[item.id] > 0 ? "bg-seve/10 border-seve/40 text-white" : "bg-white/5 border-white/5 text-white/20"}`}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {(Object.keys(SEED_LABELS) as SeedKey[]).map((seed) => (
+                <button
+                  key={seed}
+                  type="button"
+                  onClick={() => setActiveSeedTab(seed)}
+                  className={`rounded-2xl border px-4 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                    activeSeedTab === seed
+                      ? "bg-seve/20 border-seve text-seve"
+                      : "bg-white/[0.03] border-white/10 text-white/60 hover:border-white/20"
+                  }`}
+                >
+                  {SEED_LABELS[seed]}
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-5">
+              <h4 className="text-xs font-black text-white/70 uppercase tracking-widest mb-4">
+                Inventaire: {SEED_LABELS[activeSeedTab]}
+              </h4>
+              <div className="grid grid-cols-1 gap-3">
+                {SEED_EQUIPMENT_CATALOG[activeSeedTab].map((item) => {
+                  const quantity = seedEquipment[activeSeedTab]?.[item.id] || 0;
+                  return (
+                    <div
+                      key={`${activeSeedTab}:${item.id}`}
+                      className={`flex items-center justify-between p-6 rounded-[32px] border transition-all ${quantity > 0 ? "bg-seve/10 border-seve/40 text-white" : "bg-white/5 border-white/5 text-white/20"}`}
+                    >
                       <div className="flex items-center gap-6">
-                        <item.icon className={`w-6 h-6 ${inventory[item.id] > 0 ? "text-seve" : "opacity-40"}`} />
+                        <item.icon className={`w-6 h-6 ${quantity > 0 ? "text-seve" : "opacity-40"}`} />
                         <span className="text-xs font-black uppercase tracking-[0.2em]">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-6 bg-black/60 rounded-2xl p-2 border border-white/5">
-                        <button onClick={() => adjustQuantity(item.id, -1)} className="p-2 hover:text-seve transition-colors"><Minus className="w-4 h-4"/></button>
-                        <span className="text-lg font-black min-w-[30px] text-center text-seve">{inventory[item.id] || 0}</span>
-                        <button onClick={() => adjustQuantity(item.id, 1)} className="p-2 hover:text-seve transition-colors"><Plus className="w-4 h-4"/></button>
+                        <button onClick={() => adjustSeedQuantity(activeSeedTab, item.id, -1)} className="p-2 hover:text-seve transition-colors"><Minus className="w-4 h-4"/></button>
+                        <span className="text-lg font-black min-w-[30px] text-center text-seve">{quantity}</span>
+                        <button onClick={() => adjustSeedQuantity(activeSeedTab, item.id, 1)} className="p-2 hover:text-seve transition-colors"><Plus className="w-4 h-4"/></button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            ))}
+            </div>
           </div>
 
           {/* GRIMOIRE & SAUVEGARDE */}

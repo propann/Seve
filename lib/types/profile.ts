@@ -1,5 +1,7 @@
 export type CognitiveProfile = "intuitif" | "analytique" | "operatoire";
 export type ExperienceLevel = "debutant" | "intermediaire" | "avance";
+export type SeedKey = "photographie" | "cinema" | "design" | "linux";
+export type SeedEquipmentMap = Partial<Record<SeedKey, Record<string, number>>>;
 
 export interface LearningProfileData {
   age?: number | null;
@@ -8,6 +10,7 @@ export interface LearningProfileData {
   weeklyHours?: number | null;
   primaryGoal?: string;
   notes?: string;
+  seedEquipment?: SeedEquipmentMap;
 }
 
 export function isLearningProfileData(value: unknown): value is LearningProfileData {
@@ -28,6 +31,16 @@ export function isLearningProfileData(value: unknown): value is LearningProfileD
   const validWeeklyHours = data.weeklyHours === undefined || data.weeklyHours === null || typeof data.weeklyHours === "number";
   const validPrimaryGoal = data.primaryGoal === undefined || typeof data.primaryGoal === "string";
   const validNotes = data.notes === undefined || typeof data.notes === "string";
+  const validSeedEquipment =
+    data.seedEquipment === undefined ||
+    (typeof data.seedEquipment === "object" &&
+      data.seedEquipment !== null &&
+      !Array.isArray(data.seedEquipment) &&
+      Object.entries(data.seedEquipment as Record<string, unknown>).every(([seed, inventory]) => {
+        if (!["photographie", "cinema", "design", "linux"].includes(seed)) return false;
+        if (!inventory || typeof inventory !== "object" || Array.isArray(inventory)) return false;
+        return Object.values(inventory as Record<string, unknown>).every((quantity) => typeof quantity === "number");
+      }));
 
-  return validAge && validCognitive && validExperience && validWeeklyHours && validPrimaryGoal && validNotes;
+  return validAge && validCognitive && validExperience && validWeeklyHours && validPrimaryGoal && validNotes && validSeedEquipment;
 }

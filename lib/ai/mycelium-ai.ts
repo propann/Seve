@@ -5,12 +5,15 @@
  */
 
 import { prisma } from '../db/prisma';
+import { parseJsonWithFallback } from '../safe-json';
+import { isLearningProfileData, SeedKey, SeedEquipmentMap } from '../types/profile';
 
 type ResourceUser = {
   id: string;
   name: string;
   inventory: string | null;
   software: string | null;
+  profileData: string | null;
   email: string;
 };
 
@@ -20,6 +23,7 @@ type CommunityResource = {
   has: {
     inventory: Record<string, number>;
     software: string[];
+    seedEquipment: SeedEquipmentMap;
   };
 };
 
@@ -41,6 +45,11 @@ function parseSoftware(raw: string | null): string[] {
   }
 }
 
+function parseSeedEquipment(raw: string | null): SeedEquipmentMap {
+  const profile = parseJsonWithFallback(raw, {}, isLearningProfileData);
+  return profile.seedEquipment || {};
+}
+
 /**
  * RÉSUMÉ DES RESSOURCES : 
  * Permet à l'IA de voir ce que la communauté possède globalement.
@@ -52,6 +61,7 @@ export async function getCommunityResources(): Promise<CommunityResource[]> {
       name: true,
       inventory: true,
       software: true,
+      profileData: true,
       email: true
     }
   });
@@ -62,6 +72,7 @@ export async function getCommunityResources(): Promise<CommunityResource[]> {
     has: {
       inventory: parseInventory(u.inventory),
       software: parseSoftware(u.software),
+      seedEquipment: parseSeedEquipment(u.profileData),
     }
   }));
 }
@@ -76,5 +87,13 @@ export async function findAidForResource(resourceId: string) {
   return resources.filter(r => {
     const inv = r.has.inventory;
     return inv[resourceId] && inv[resourceId] > 0;
+  });
+}
+
+export async function findAidForSeedResource(seed: SeedKey, resourceId: string) {
+  const resources = await getCommunityResources();
+  return resources.filter((r) => {
+    const seedInv = r.has.seedEquipment[seed] || {};
+    return (seedInv[resourceId] || 0) > 0;
   });
 }
