@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { SidebarNavigation } from "@/components/ui/SidebarNavigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,9 +20,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
-  // Protection des routes : si pas chargé et pas d'utilisateur, on attend ou on redirige
-  if (!isLoading && !user) {
-    router.push("/");
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user) {
+      router.replace("/");
+      return;
+    }
+    if (!user.selectedSeed) {
+      router.replace("/garden");
+    }
+  }, [isLoading, user, router]);
+
+  // On attend la fin de chargement et les redirections éventuelles.
+  if (isLoading || !user || !user.selectedSeed) {
     return null;
   }
 

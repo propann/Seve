@@ -45,7 +45,7 @@ export function AuthForm() {
     if (!response.ok || !data.success) {
       throw new Error(data.error || "Operation impossible.");
     }
-    window.location.href = data.redirectTo || "/dashboard";
+    window.location.href = data.redirectTo || "/garden";
   };
 
   const handleLogin = async (values: LoginFields) => {

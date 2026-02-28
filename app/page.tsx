@@ -11,10 +11,6 @@ export default function HomePage() {
         if (!response.ok) return;
         const data = await response.json();
         if (data?.authenticated && data?.user) {
-          if (data.user.selectedSeed) {
-            window.location.href = "/dashboard/courses/m0-1";
-            return;
-          }
           window.location.href = "/garden";
         }
       } catch {

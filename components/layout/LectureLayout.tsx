@@ -46,9 +46,9 @@ export const LectureLayout: React.FC<LectureLayoutProps> = ({ children, level, t
                 </Link>
             ) : <div />}
 
-            <Link href="/dashboard" className="flex flex-col items-center gap-2 group opacity-40 hover:opacity-100 transition-opacity">
+            <Link href="/garden" className="flex flex-col items-center gap-2 group opacity-40 hover:opacity-100 transition-opacity">
                 <TreePine className="w-6 h-6 text-white group-hover:text-seve transition-colors" />
-                <span className="text-[8px] font-black uppercase tracking-[0.3em]">Retour à l'Arbre</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em]">Retour au Jardin</span>
             </Link>
 
             {nextSlug ? (

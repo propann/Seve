@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cursus } from "@/lib/data/cursus";
 import { CheckCircle2, Circle, Lock, Zap, TreePine, LogOut, Home, ShieldAlert, MessageCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
@@ -20,7 +20,8 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
   xp
 }) => {
   const pathname = usePathname();
-  const { logout, user } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "TEACHER";
 
@@ -128,12 +129,20 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
             </div>
         </div>
         
-        <button 
-            onClick={logout}
+        <button
+            onClick={() => router.push("/garden")}
+            className="w-full flex items-center gap-3 p-4 rounded-2xl text-seve/70 hover:text-seve hover:bg-seve/5 transition-all text-[10px] font-black uppercase tracking-widest"
+        >
+            <TreePine className="w-4 h-4" />
+            Retour au Jardin
+        </button>
+
+        <button
+            onClick={() => void logout()}
             className="w-full flex items-center gap-3 p-4 rounded-2xl text-red-400/60 hover:text-red-400 hover:bg-red-400/5 transition-all text-[10px] font-black uppercase tracking-widest"
         >
             <LogOut className="w-4 h-4" />
-            Quitter le Mycélium
+            Deconnexion
         </button>
       </div>
     </aside>

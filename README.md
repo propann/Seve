@@ -15,6 +15,8 @@ Frontend principal servi sur `azoth.cloud`.
 - Authentification unifiée (connexion / création de compte)
 - Sessions via cookie `HttpOnly` signé
 - Sélection de graine (`/garden`) persistée en PostgreSQL
+- `/garden` est la page principale après connexion/reconnexion
+- Le Jardin sert de hub: choix de graine (1re fois), votes modules et chat Mycélium
 - Protection de routes via middleware (`/dashboard`, `/rituel`, `/garden`, `/admin`)
 - Hub admin (`/admin`) réservé aux rôles `ADMIN` et `TEACHER`
 
@@ -68,6 +70,13 @@ npm run start -- --hostname 127.0.0.1 --port 3000
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 - `POST /api/auth/seed`
+
+Comportement de redirection (2026-02-28):
+- `signup` -> `/garden`
+- `login` -> `/garden` (même si la graine est déjà définie)
+- `seed` -> `/garden`
+- Depuis les cours: bouton "Retour au Jardin" en footer de leçon
+- Sidebar dashboard: `Retour au Jardin` (navigation) et `Déconnexion` (logout réel)
 
 ## Déploiement pro avec Git + Coolify
 

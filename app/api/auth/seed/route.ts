@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/session-token";
 import { prisma } from "@/lib/db/prisma";
 
-const ALLOWED_SEEDS = ["photographie", "cinema", "design"];
+const ALLOWED_SEEDS = ["photographie", "cinema", "design", "linux"];
 
 export async function POST(request: Request) {
   try {
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       data: { selectedSeed: seed },
     });
 
-    return NextResponse.json({ success: true, redirectTo: "/dashboard/courses/m0-1" });
+    return NextResponse.json({ success: true, redirectTo: "/garden" });
   } catch (error) {
     console.error("api/auth/seed error", error);
     return NextResponse.json({ success: false, error: "Erreur interne." }, { status: 500 });

@@ -22,6 +22,13 @@ Derniere mise a jour: 2026-02-28
 - Correction build Prisma en Docker (`npx prisma generate` avant `next build`).
 - Correction build Resend (initialisation lazy si `RESEND_API_KEY` absent).
 - Stabilisation lint pour code legacy/editorial (regles non bloquantes).
+- Refonte flux navigation utilisateur:
+  - post-connexion/reconnexion -> `/garden` (plus de saut direct vers un cours)
+  - fin de cours -> bouton `Retour au Jardin`
+  - sidebar dashboard -> `Retour au Jardin` + `Deconnexion` separes
+- Jardin transforme en page d'actualite principale:
+  - hub central avec acces arbre, chat Mycelium et votes modules
+  - retour au Jardin possible meme apres choix de graine
 
 ## Risques connus
 

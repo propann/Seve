@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const response = NextResponse.json({
       success: true,
       needsSeed,
-      redirectTo: needsSeed ? "/garden" : "/dashboard/courses/m0-1",
+      redirectTo: "/garden",
     });
 
     response.cookies.set("arbre_session", sessionToken, {

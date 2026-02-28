@@ -18,14 +18,9 @@ export default async function GardenPage() {
     redirect("/");
   }
 
-  if (user.selectedSeed) {
-    redirect("/dashboard/courses/m0-1");
-  }
-
   return (
     <div className="min-h-screen bg-background text-textMain flex items-center justify-center px-6 py-16">
-      <Garden />
+      <Garden selectedSeed={user.selectedSeed} />
     </div>
   );
 }
-
