@@ -15,7 +15,7 @@ const seeds = [
     icon: Camera,
     featured: true,
     isReady: true,
-    presentationHref: "/dashboard/courses/m0-1",
+    presentationHref: "/dashboard/courses/photographie",
   },
   {
     key: "cinema",
