@@ -54,8 +54,9 @@ Format de presentation obligatoire (template v1):
 ## 5) Cours et contenu
 
 - [x] Presentation photographie exploitable
+- [x] Presentation Linux "Voie de l Alchimiste" (Hero + 4 paliers + projet final)
 - [ ] Finaliser assets manquants photo (images, corrections)
-- [ ] Construire presentations cinema/dessin/linux (version complete)
+- [ ] Construire presentations cinema/dessin (version complete)
 - [ ] Valider coherence modules vs promesse presentation
 - [ ] Definir checklist qualitative par module (pedagogie + UX + exercices)
 

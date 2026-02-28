@@ -33,6 +33,9 @@ Derniere mise a jour: 2026-02-28
   - post-connexion/reconnexion -> `/garden` (plus de saut direct vers un cours)
   - fin de cours -> bouton `Retour au Jardin`
   - sidebar dashboard -> `Retour au Jardin` + `Deconnexion` separes
+- Cursus Linux engage avec page de presentation premium:
+  - `/dashboard/courses/linux` structuree en 4 paliers (Germination -> Transmutation)
+  - section philosophie + projet final de maitrise
 - Jardin transforme en page d'actualite principale:
   - hub central avec acces arbre, chat Mycelium et votes modules
   - retour au Jardin possible meme apres choix de graine
