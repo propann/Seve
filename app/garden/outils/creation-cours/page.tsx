@@ -19,7 +19,7 @@ export default function CourseCreationToolPage() {
           <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
             <Lightbulb className="w-5 h-5 text-amberGlow mb-3" />
             <h2 className="text-white font-black uppercase text-sm">Idee</h2>
-            <p className="text-white/60 text-xs mt-2">Proposez un sujet depuis le Jardin.</p>
+            <p className="text-white/60 text-xs mt-2">Proposez ici un sujet de cours.</p>
           </article>
           <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
             <Vote className="w-5 h-5 text-seve mb-3" />
@@ -35,7 +35,7 @@ export default function CourseCreationToolPage() {
 
         <div className="rounded-3xl border border-seve/20 bg-seve/10 p-6">
           <p className="text-sm text-white/85">
-            En attendant la sortie de l&apos;outil complet, utilisez le bouton <strong>Proposer un cours</strong> dans le Jardin pour soumettre des sujets au vote.
+            Le Jardin affiche les graines, les cours valides et les votes. La proposition de nouveaux cours se fera ici, dans cet outil.
           </p>
         </div>
 

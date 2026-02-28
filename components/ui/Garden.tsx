@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseJsonWithFallback } from "@/lib/safe-json";
 import Link from "next/link";
-import { Camera, Film, PenTool, Loader2, Terminal, TreePine, MessageCircle, BarChart3, ChevronRight, Lightbulb } from "lucide-react";
-import { cursus } from "@/lib/data/cursus";
+import { Camera, Film, PenTool, Loader2, Terminal, ChevronRight, User as UserIcon, LogOut } from "lucide-react";
 import { MyceliumChat } from "@/components/ui/MyceliumChat";
+import { useAuth } from "@/lib/auth/AuthContext";
 
 const seeds = [
   {
@@ -14,6 +14,8 @@ const seeds = [
     description: "Maitrisez la lumiere et le temps.",
     icon: Camera,
     featured: true,
+    isReady: true,
+    presentationHref: "/dashboard/courses/m0-1",
   },
   {
     key: "cinema",
@@ -21,13 +23,15 @@ const seeds = [
     description: "Narration visuelle et mouvement.",
     icon: Film,
     featured: false,
+    isReady: false,
   },
   {
     key: "design",
-    title: "Design",
+    title: "Dessin",
     description: "Composition et langage graphique.",
     icon: PenTool,
     featured: false,
+    isReady: false,
   },
   {
     key: "linux",
@@ -35,6 +39,7 @@ const seeds = [
     description: "Systemes, shell et culture open source.",
     icon: Terminal,
     featured: false,
+    isReady: false,
   },
 ];
 
@@ -42,59 +47,22 @@ interface GardenProps {
   selectedSeed?: string | null;
 }
 
-const VOTE_STORAGE_KEY = "arbre:garden:votes:v1";
-
-interface CommunityProposal {
-  id: string;
-  title: string;
-  objective: string;
-  createdAt: string;
-}
-
-function isCommunityProposalArray(value: unknown): value is CommunityProposal[] {
-  if (!Array.isArray(value)) return false;
-  return value.every((entry) => {
-    if (!entry || typeof entry !== "object") return false;
-    const proposal = entry as Record<string, unknown>;
-    return (
-      typeof proposal.id === "string" &&
-      typeof proposal.title === "string" &&
-      typeof proposal.objective === "string" &&
-      typeof proposal.createdAt === "string"
-    );
-  });
-}
+const VOTE_STORAGE_KEY = "arbre:garden:seed-votes:v2";
 
 export function Garden({ selectedSeed }: GardenProps) {
+  const { user, logout } = useAuth();
   const [pendingSeed, setPendingSeed] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [votedByUser, setVotedByUser] = useState<Record<string, boolean>>({});
-  const [communityProposals, setCommunityProposals] = useState<CommunityProposal[]>([]);
-  const [proposalTitle, setProposalTitle] = useState("");
-  const [proposalObjective, setProposalObjective] = useState("");
-  const [proposalMessage, setProposalMessage] = useState("");
-
-  const moduleOptions = useMemo(
-    () =>
-      cursus.flatMap((level) =>
-        level.modules.map((module) => ({
-          id: module.id,
-          title: module.title,
-          objective: module.objective,
-          source: "official" as const,
-        }))
-      ),
-    []
-  );
+  const votableSeeds = useMemo(() => seeds.filter((seed) => !seed.isReady), []);
+  const readySeeds = useMemo(() => seeds.filter((seed) => seed.isReady), []);
 
   useEffect(() => {
-    if (!selectedSeed) return;
     const raw = window.localStorage.getItem(VOTE_STORAGE_KEY);
     const parsed = parseJsonWithFallback<{
       votes?: Record<string, number>;
       votedByUser?: Record<string, boolean>;
-      communityProposals?: CommunityProposal[];
     }>(raw, {});
 
     const safeVotes =
@@ -103,14 +71,15 @@ export function Garden({ selectedSeed }: GardenProps) {
       parsed.votedByUser && Object.values(parsed.votedByUser).every((value) => typeof value === "boolean")
         ? parsed.votedByUser
         : {};
-    const safeCommunityProposals = isCommunityProposalArray(parsed.communityProposals)
-      ? parsed.communityProposals
-      : [];
+    const allowedIds = new Set(votableSeeds.map((seed) => seed.key));
+    const filteredVotes = Object.fromEntries(Object.entries(safeVotes).filter(([seedId]) => allowedIds.has(seedId)));
+    const filteredVotedByUser = Object.fromEntries(
+      Object.entries(safeVotedByUser).filter(([seedId]) => allowedIds.has(seedId))
+    );
 
-    setVotes(safeVotes);
-    setVotedByUser(safeVotedByUser);
-    setCommunityProposals(safeCommunityProposals);
-  }, [selectedSeed]);
+    setVotes(filteredVotes);
+    setVotedByUser(filteredVotedByUser);
+  }, [votableSeeds]);
 
   const selectSeed = async (seed: string) => {
     setPendingSeed(seed);
@@ -133,277 +102,201 @@ export function Garden({ selectedSeed }: GardenProps) {
     }
   };
 
-  const voteForModule = (moduleId: string) => {
-    const alreadyVoted = Boolean(votedByUser[moduleId]);
+  const voteForSeed = (seedId: string) => {
+    const alreadyVoted = Boolean(votedByUser[seedId]);
     const nextVotes = {
       ...votes,
-      [moduleId]: Math.max(0, (votes[moduleId] || 0) + (alreadyVoted ? -1 : 1)),
+      [seedId]: Math.max(0, (votes[seedId] || 0) + (alreadyVoted ? -1 : 1)),
     };
     const nextVotedByUser = {
       ...votedByUser,
-      [moduleId]: !alreadyVoted,
+      [seedId]: !alreadyVoted,
     };
 
     setVotes(nextVotes);
     setVotedByUser(nextVotedByUser);
 
-    window.localStorage.setItem(
-      VOTE_STORAGE_KEY,
-      JSON.stringify({ votes: nextVotes, votedByUser: nextVotedByUser, communityProposals })
-    );
+    window.localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify({ votes: nextVotes, votedByUser: nextVotedByUser }));
   };
 
-  if (selectedSeed) {
-    const communityModules = communityProposals.map((proposal) => ({
-      id: proposal.id,
-      title: proposal.title,
-      objective: proposal.objective,
-      source: "community" as const,
-    }));
+  const rankedSeeds = [...votableSeeds].sort((a, b) => (votes[b.key] || 0) - (votes[a.key] || 0));
 
-    const rankedModules = [...moduleOptions, ...communityModules]
-      .sort((a, b) => (votes[b.id] || 0) - (votes[a.id] || 0))
-      .slice(0, 12);
-
-    const submitProposal = () => {
-      setProposalMessage("");
-      const cleanTitle = proposalTitle.trim();
-      const cleanObjective = proposalObjective.trim();
-
-      if (cleanTitle.length < 6) {
-        setProposalMessage("Titre trop court (6 caracteres minimum).");
-        return;
-      }
-      if (cleanObjective.length < 12) {
-        setProposalMessage("Description trop courte (12 caracteres minimum).");
-        return;
-      }
-
-      const proposal: CommunityProposal = {
-        id: `P.${Date.now()}`,
-        title: cleanTitle,
-        objective: cleanObjective,
-        createdAt: new Date().toISOString(),
-      };
-
-      const nextCommunityProposals = [proposal, ...communityProposals].slice(0, 20);
-      const nextVotes = { ...votes, [proposal.id]: 0 };
-      const nextVotedByUser = { ...votedByUser, [proposal.id]: false };
-
-      setCommunityProposals(nextCommunityProposals);
-      setVotes(nextVotes);
-      setVotedByUser(nextVotedByUser);
-      setProposalTitle("");
-      setProposalObjective("");
-      setProposalMessage("Proposition ajoutee au vote communautaire.");
-
-      window.localStorage.setItem(
-        VOTE_STORAGE_KEY,
-        JSON.stringify({
-          votes: nextVotes,
-          votedByUser: nextVotedByUser,
-          communityProposals: nextCommunityProposals,
-        })
-      );
-    };
-
-    return (
-      <div className="w-full max-w-6xl space-y-10">
-        <header className="text-center space-y-3">
+  return (
+    <div className="w-full max-w-6xl space-y-10">
+      <header className="flex items-start justify-between gap-4">
+        <div className="space-y-3">
           <h1 className="text-4xl md:text-6xl font-black text-white uppercase italic tracking-tighter">
             Jardin des <span className="text-seve">Graines</span>
           </h1>
-          <p className="text-white/60 text-sm uppercase tracking-wider">
-            Hub communautaire | Votes des modules | Chat mycelium
+          <p className="text-white/60 text-xs uppercase tracking-wider">
+            Graines en haut | Cours valides | Votes communautaires | Chat
           </p>
-        </header>
+        </div>
 
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Link
-            href="/dashboard"
-            className="rounded-2xl border border-seve/20 bg-seve/10 p-5 hover:bg-seve/15 transition-all"
-          >
-            <TreePine className="w-6 h-6 text-seve mb-3" />
-            <h2 className="text-white font-black uppercase text-sm">Mon arbre</h2>
-            <p className="text-white/60 text-xs mt-2">Revenir a la carte complete des modules</p>
-          </Link>
-
-          <Link
-            href="/dashboard/mycelium"
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:border-white/20 transition-all"
-          >
-            <MessageCircle className="w-6 h-6 text-white mb-3" />
-            <h2 className="text-white font-black uppercase text-sm">Chat mycelium</h2>
-            <p className="text-white/60 text-xs mt-2">Discuter, demander de l'aide, partager</p>
-          </Link>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <BarChart3 className="w-6 h-6 text-white mb-3" />
-            <h2 className="text-white font-black uppercase text-sm">Votes actifs</h2>
-            <p className="text-white/60 text-xs mt-2">Priorisez les prochains modules a approfondir</p>
-          </div>
-
-          <Link
-            href="/garden/outils/creation-cours"
-            className="rounded-2xl border border-amberGlow/25 bg-amberGlow/5 p-5 hover:bg-amberGlow/10 transition-all"
-          >
-            <Lightbulb className="w-6 h-6 text-amberGlow mb-3" />
-            <h2 className="text-white font-black uppercase text-sm">Outil creation</h2>
-            <p className="text-white/60 text-xs mt-2">La fabrique de cours arrive bientot</p>
-          </Link>
-        </section>
-
-        <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8 space-y-5">
-          <div className="space-y-2">
-            <h3 className="text-white text-xl md:text-2xl font-black uppercase">Proposer un cours</h3>
-            <p className="text-white/50 text-xs uppercase tracking-widest">
-              Votre idee est publiee dans les votes de la communaute
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              value={proposalTitle}
-              onChange={(e) => setProposalTitle(e.target.value)}
-              placeholder="Titre du cours propose"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-seve"
-            />
-            <input
-              value={proposalObjective}
-              onChange={(e) => setProposalObjective(e.target.value)}
-              placeholder="Objectif ou valeur pour la communaute"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-seve"
-            />
-          </div>
-
-          <div className="flex flex-col md:flex-row gap-3 md:items-center">
+        {user && (
+          <div className="flex items-center gap-2">
+            <Link
+              href="/rituel"
+              className="inline-flex items-center gap-2 rounded-full border border-seve/25 bg-seve/10 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/15 transition-all"
+            >
+              <UserIcon className="w-3 h-3" />
+              Compte
+            </Link>
             <button
               type="button"
-              onClick={submitProposal}
-              className="inline-flex items-center justify-center rounded-2xl border border-seve/30 bg-seve/15 px-5 py-3 text-seve font-black uppercase text-xs tracking-widest hover:bg-seve/20 transition-all"
+              onClick={logout}
+              className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.03] p-2 text-white/70 hover:text-red-300 hover:border-red-300/30 transition-all"
+              aria-label="Se deconnecter"
             >
-              Soumettre au vote
+              <LogOut className="w-4 h-4" />
             </button>
-            <Link
-              href="/garden/outils/creation-cours"
-              className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/[0.03] px-5 py-3 text-white/80 font-black uppercase text-xs tracking-widest hover:border-white/25"
-            >
-              Voir l'outil de creation (bientot)
-            </Link>
           </div>
-
-          <p className="text-[11px] text-white/45">
-            L'outil complet de creation de cours arrive bientot. Pour l'instant, vous pouvez proposer un sujet puis mobiliser la communaute via les votes.
-          </p>
-          {proposalMessage && <p className="text-[11px] text-seve">{proposalMessage}</p>}
-        </section>
-
-        <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div>
-              <h3 className="text-white text-xl md:text-2xl font-black uppercase">Vote des modules</h3>
-              <p className="text-white/50 text-xs uppercase tracking-widest">
-                Cliquez pour voter ou retirer votre vote
-              </p>
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-seve">
-              Graine: {selectedSeed}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {rankedModules.map((module) => {
-              const score = votes[module.id] || 0;
-              const isVoted = Boolean(votedByUser[module.id]);
-
-              return (
-                <button
-                  key={module.id}
-                  type="button"
-                  onClick={() => voteForModule(module.id)}
-                  className={`text-left rounded-2xl border p-4 transition-all ${
-                    isVoted ? "border-seve/40 bg-seve/10" : "border-white/10 bg-white/[0.02] hover:border-white/20"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-white/40">{module.id}</p>
-                      <h4 className="text-sm font-black text-white uppercase mt-2">{module.title}</h4>
-                      <p className="text-xs text-white/60 mt-2">{module.objective}</p>
-                      {module.source === "community" && (
-                        <p className="mt-2 text-[10px] uppercase tracking-widest text-amberGlow">Proposition communaute</p>
-                      )}
-                    </div>
-                    <div className="text-right min-w-16">
-                      <p className="text-seve text-2xl font-black leading-none">{score}</p>
-                      <p className="text-[10px] uppercase tracking-widest text-white/40">votes</p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8 space-y-5">
-          <div>
-            <h3 className="text-white text-xl md:text-2xl font-black uppercase">Chat du Jardin</h3>
-            <p className="text-white/50 text-xs uppercase tracking-widest">
-              Echanges en direct avec la communaute
-            </p>
-          </div>
-          <MyceliumChat roomSlug="general" roomName="Le Mycelium (General)" />
-        </section>
-
-        <div className="flex justify-center">
-          <Link
-            href="/dashboard/courses/m0-1"
-            className="inline-flex items-center gap-3 rounded-full border border-seve/30 bg-seve/15 px-6 py-3 text-seve font-black uppercase text-xs tracking-widest hover:bg-seve/20 transition-all"
-          >
-            Revenir au cours
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-full max-w-5xl">
-      <header className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter">
-          Le Jardin des <span className="text-seve">Graines</span>
-        </h1>
-        <p className="text-white/60 mt-3 text-sm uppercase tracking-wider">Choisissez votre premiere voie d'apprentissage</p>
+        )}
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {seeds.map((seed) => {
           const Icon = seed.icon;
           const isPending = pendingSeed === seed.key;
-          const disabled = !!pendingSeed;
+          const isSelected = selectedSeed === seed.key;
+          const disabled = !!pendingSeed || (!!selectedSeed && !isSelected);
+
+          const cardClass = seed.featured
+            ? "border-seve/40 bg-seve/10 shadow-[0_0_35px_rgba(46,204,113,0.15)]"
+            : "border-white/10 bg-white/[0.03]";
+
+          const stateText = seed.isReady
+            ? "Cours pret"
+            : isSelected
+              ? "Graine active"
+              : selectedSeed
+                ? "Vote ouvert"
+                : "Selection";
+
           return (
-            <button
+            <div
               key={seed.key}
-              disabled={disabled}
-              onClick={() => selectSeed(seed.key)}
               className={`text-left rounded-3xl border p-6 transition-all ${
-                seed.featured
-                  ? "border-seve/40 bg-seve/10 shadow-[0_0_35px_rgba(46,204,113,0.15)] hover:scale-105 hover:shadow-[0_0_45px_rgba(46,204,113,0.30)]"
-                  : "border-white/10 bg-white/[0.03] hover:border-white/20"
-              } ${disabled ? "opacity-80" : ""}`}
+                cardClass
+              } ${isSelected ? "ring-1 ring-seve/50" : ""} ${disabled ? "opacity-70" : "hover:border-white/20 hover:scale-[1.01]"}`}
             >
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${seed.featured ? "bg-seve/20 text-seve" : "bg-white/10 text-white/70"}`}>
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Icon className="w-5 h-5" />}
               </div>
+              <p className="mt-4 text-[10px] uppercase tracking-widest text-white/45">{stateText}</p>
               <h2 className="mt-5 text-2xl font-black uppercase text-white">{seed.title}</h2>
               <p className="mt-3 text-sm text-white/60">{seed.description}</p>
-            </button>
+              {!selectedSeed && (
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={() => selectSeed(seed.key)}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.03] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white/80 hover:border-white/30 transition-all disabled:opacity-60"
+                >
+                  Choisir cette graine
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              )}
+              {seed.presentationHref && (
+                <Link
+                  href={seed.presentationHref}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-seve/30 bg-seve/15 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/20 transition-all"
+                >
+                  Voir la presentation
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
           );
         })}
-      </div>
+      </section>
 
       {error && <p className="mt-5 text-red-400 text-xs uppercase tracking-widest text-center">{error}</p>}
+
+      <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8 space-y-4">
+        <h3 className="text-white text-xl md:text-2xl font-black uppercase">Cours valides</h3>
+        <p className="text-white/50 text-xs uppercase tracking-widest">
+          Les cours ayant passe la procedure sont accessibles directement
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {readySeeds.map((seed) => (
+            <article key={seed.key} className="rounded-2xl border border-seve/30 bg-seve/10 p-4">
+              <p className="text-[10px] uppercase tracking-widest text-seve">Pret</p>
+              <h4 className="text-lg font-black text-white uppercase mt-2">{seed.title}</h4>
+              <p className="text-sm text-white/60 mt-2">Version actuelle exploitable pour la navigation et le test.</p>
+              {seed.presentationHref && (
+                <Link
+                  href={seed.presentationHref}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-seve/30 bg-seve/20 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/25 transition-all"
+                >
+                  Ouvrir la page de presentation
+                  <ChevronRight className="w-3 h-3" />
+                </Link>
+              )}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="text-white text-xl md:text-2xl font-black uppercase">Vote des graines</h3>
+            <p className="text-white/50 text-xs uppercase tracking-widest">
+              Test des votes pour Cinema, Dessin et Linux (pas de vote sur Photographie)
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {rankedSeeds.map((seed) => {
+            const score = votes[seed.key] || 0;
+            const isVoted = Boolean(votedByUser[seed.key]);
+            return (
+              <button
+                key={seed.key}
+                type="button"
+                onClick={() => voteForSeed(seed.key)}
+                className={`text-left rounded-2xl border p-4 transition-all ${
+                  isVoted ? "border-seve/40 bg-seve/10" : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40">{seed.key}</p>
+                    <h4 className="text-sm font-black text-white uppercase mt-2">{seed.title}</h4>
+                    <p className="text-xs text-white/60 mt-2">{seed.description}</p>
+                  </div>
+                  <div className="text-right min-w-16">
+                    <p className="text-seve text-2xl font-black leading-none">{score}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40">votes</p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6">
+          <Link
+            href="/garden/outils/creation-cours"
+            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.03] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-white/80 hover:border-white/30 transition-all"
+          >
+            La proposition des cours se fait dans l'outil de creation
+            <ChevronRight className="w-3 h-3" />
+          </Link>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-white/10 bg-black/30 p-6 md:p-8 space-y-5">
+        <div>
+          <h3 className="text-white text-xl md:text-2xl font-black uppercase">Chat du Jardin</h3>
+          <p className="text-white/50 text-xs uppercase tracking-widest">
+            Chat integre sous les graines et les votes
+          </p>
+        </div>
+        <MyceliumChat roomSlug="general" roomName="Le Mycelium (General)" />
+      </section>
     </div>
   );
 }
