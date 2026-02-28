@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SEVE Web (Next.js)
 
-## Getting Started
+Frontend principal servi sur `azoth.cloud`.
 
-First, run the development server:
+## Fonctionnalités clés
+
+- Portail d'entrée immersif (landing plein écran)
+- Authentification unifiée (connexion / création de compte)
+- Sessions via cookie `HttpOnly` signé
+- Sélection de graine (`/garden`) persistée en PostgreSQL
+- Protection de routes via middleware (`/dashboard`, `/rituel`, `/garden`, `/admin`)
+- Hub admin (`/admin`) réservé aux rôles `ADMIN` et `TEACHER`
+
+## Monétisation et progression (règles 2026)
+
+- Niveau 0 (Racines): 100% gratuit, progression automatique après sélection de graine.
+- Niveau 1 (Tronc): entrée partiellement gratuite, paywall au milieu/fin du Tronc.
+- Niveaux 2 a 5 (Branches -> Canopée): accès strictement payant.
+- Aucune ouverture anticipée des niveaux supérieurs sans paiement confirmé.
+- La croissance visuelle de l'arbre reflète strictement les segments débloqués/payés.
+- Un upgrade déclenche une animation majeure de croissance (branches, feuilles, pulsation verte).
+- Les messages de paywall doivent rester motivants et poétiques, liés a la vitalité de l'arbre.
+
+## Démarrage local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Application locale: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build -- --webpack
+npm run start -- --hostname 127.0.0.1 --port 3000
+```
 
-## Learn More
+## Variables importantes
 
-To learn more about Next.js, take a look at the following resources:
+- `DATABASE_URL` (PostgreSQL)
+- `AUTH_SESSION_SECRET` (signature des cookies de session, min 32 caractères)
+- `RESEND_API_KEY` (emails transactionnels)
+- `CLERK_WEBHOOK_SECRET` (webhook Clerk, si activé)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Auth
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `POST /api/auth/seed`
 
-## Deploy on Vercel
+## Déploiement pro avec Git + Coolify
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Ce projet est prêt pour un déploiement conteneurisé via Coolify:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `Dockerfile` multi-stage (prod)
+- `next.config.ts` avec `output: "standalone"`
+- `.dockerignore` pour accélérer les builds
+
+### Workflow recommandé
+
+1. Commit + push sur le dépôt Git.
+2. Dans Coolify: **New Resource -> Application -> Public Repository** (ou privé via token).
+3. Définir `Base Directory` sur `/` si ce repo contient uniquement `web`, sinon sur `web`.
+4. Build Pack: `Dockerfile`.
+5. Exposer le port `3000`.
+6. Renseigner les variables d'environnement (`DATABASE_URL`, `AUTH_SESSION_SECRET`, etc.).
+7. Activer l'auto-deploy sur `push` (webhook Git).
+
+Chaque `git push` sur la branche configurée déclenche un nouveau build et déploiement automatique.

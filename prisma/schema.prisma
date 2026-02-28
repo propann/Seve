@@ -1,0 +1,53 @@
+// prisma/schema.prisma update
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String
+  name           String
+  role           String   @default("STUDENT")
+  avatar         String?
+  os             String?
+  characterClass String   @default("Graine")
+  selectedSeed   String?  @map("selected_seed")
+  xp             Int      @default(0)
+  level          Int      @default(0)
+  inventory      String?
+  software       String?
+  alignment      Int      @default(50)
+  unlockedNodes  String   @default("0.1")
+  completedNodes String   @default("")
+  messages       Message[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Room {
+  id          String    @id @default(cuid())
+  name        String    // ex: "Le Mycélium", "Aide Technique", "Critique"
+  slug        String    @unique
+  description String?
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  text      String
+  imageUrl  String?  // Si une photo est partagée dans le chat
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id])
+  isAI      Boolean  @default(false) // Pour identifier les réponses du Maître IA
+  createdAt DateTime @default(now())
+}

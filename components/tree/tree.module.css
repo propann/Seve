@@ -1,0 +1,41 @@
+.container {
+  width: 100%;
+  height: 600px;
+  position: relative;
+}
+
+.svg {
+  width: 100%;
+  height: 100%;
+}
+
+.node {
+  cursor: pointer;
+}
+
+.nodeLocked {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.legend {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.legendTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.legendText {
+  font-size: 0.75rem;
+  color: #4b5563;
+}

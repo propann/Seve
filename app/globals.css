@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0b0b0b;
+  --color-seve: #2ecc71;
+  --color-bark: #1a1a1a;
+  --color-textMain: #e0e0e0;
+  --color-amberGlow: #f59e0b;
+
+  --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
+
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px rgba(46, 204, 113, 0.2);
+    }
+    100% {
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+    }
+  }
+}
+
+:root {
+  --background: #0b0b0b;
+  --foreground: #e0e0e0;
+  --seve: #2ecc71;
+}
+
+/* --- OPTIMISATION LISIBILITÉ --- */
+html {
+  font-size: 18px; /* Augmentation de la taille de base (16px -> 18px) */
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  line-height: 1.6; /* Meilleur espacement entre les lignes */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom CSS for the Cyber-Organic vibe */
+.cyber-tree-node {
+  transition: filter 0.3s ease;
+  filter: drop-shadow(0 0 5px rgba(46, 204, 113, 0.2));
+}
+
+.cyber-tree-node:hover {
+  filter: drop-shadow(0 0 15px rgba(46, 204, 113, 0.8));
+}
+
+.glow-text {
+  text-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+/* Scrollbar for Dark Mode */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0b0b;
+}
+::-webkit-scrollbar-thumb {
+  background: #2ecc71;
+  border-radius: 10px;
+  border: 2px solid #0b0b0b;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(46, 204, 113, 0.2);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(46, 204, 113, 0.5);
+}
