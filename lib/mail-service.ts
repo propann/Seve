@@ -5,10 +5,22 @@
 
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return null;
+  }
+  return new Resend(apiKey);
+}
 
 export async function sendWelcomeEmail(email: string, name: string) {
   try {
+    const resend = getResendClient();
+    if (!resend) {
+      console.warn("RESEND_API_KEY absent: email de bienvenue non envoyé.");
+      return { success: false, error: "missing_resend_api_key" };
+    }
+
     const data = await resend.emails.send({
       from: "L'Arbre de la Photographie <maitre@votre-domaine.com>",
       to: [email],
