@@ -2,13 +2,10 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@/lib/auth/AuthContext";
-import { loginUserAction } from "@/lib/actions/auth";
 import { Mail, Lock, Loader2, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function SignInPage() {
-  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,15 +17,19 @@ export default function SignInPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await loginUserAction(email, password);
-      if (result.success && result.user) {
-        login(result.user);
-        window.location.href = "/dashboard";
-      } else {
-        throw new Error(result.error || "Identifiants invalides.");
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Identifiants invalides.");
       }
-    } catch (err: any) {
-      setError(err.message);
+      window.location.href = data.redirectTo || "/garden";
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Connexion impossible.");
     } finally {
       setIsSubmitting(false);
     }

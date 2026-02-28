@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/lib/internal-auth';
-import { logoutUserAction } from '@/lib/actions/auth';
 import { parseJsonWithFallback } from '@/lib/safe-json';
 
 interface AuthContextType {
@@ -59,10 +58,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
-    await logoutUserAction();
-    setUser(null);
-    localStorage.removeItem('arbre_session');
-    window.location.href = "/";
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      setUser(null);
+      localStorage.removeItem('arbre_session');
+      window.location.href = "/";
+    }
   };
 
   const updateUser = (newData: Partial<User>) => {

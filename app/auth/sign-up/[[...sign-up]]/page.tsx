@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@/lib/auth/AuthContext";
-import { registerUserAction, loginUserAction } from "@/lib/actions/auth";
 import { Mail, Lock, User as UserIcon, Loader2, ShieldCheck } from "lucide-react";
 import { CyberPasswordStrength } from "@/components/ui/CyberPasswordStrength";
 import Link from "next/link";
@@ -11,7 +9,6 @@ import Link from "next/link";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignUpPage() {
-  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -48,16 +45,17 @@ export default function SignUpPage() {
         throw new Error("Mot de passe trop court (10 caracteres minimum).");
       }
 
-      const reg = await registerUserAction(normalizedEmail, password, trimmedName || "Explorateur");
-      if (!reg.success) throw new Error(reg.error);
-
-      const log = await loginUserAction(normalizedEmail, password);
-      if (log.success && log.user) {
-        login(log.user);
-        window.location.href = "/";
-      } else {
-        throw new Error(log.error || "Connexion impossible apres creation.");
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name: trimmedName, email: normalizedEmail, password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Creation de compte impossible.");
       }
+      window.location.href = data.redirectTo || "/garden";
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Erreur inconnue.";
       setError(message);
