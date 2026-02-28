@@ -54,3 +54,4 @@ Derniere mise a jour: 2026-02-28
 2. Reduire progressivement les warnings lint critiques (types `any`, refs en render).
 3. Ajouter tests automatiques minimum sur auth/session/routes API.
 4. Mettre en place CI (lint + build + tests) avant merge sur `main`.
+5. Piloter la cloture projet via le backlog unique: [PROJECT_FINAL_TASKS.md](/home/azoth/web/docs/PROJECT_FINAL_TASKS.md).

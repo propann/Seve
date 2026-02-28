@@ -83,13 +83,19 @@ export default function PhotographyCoursePresentationPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.3 }}
-            className="mt-10"
+            className="mt-10 flex flex-wrap items-center gap-3"
           >
             <Link
               href="/dashboard/courses/m0-1"
               className="inline-flex rounded-full border border-amber-200/70 bg-amber-200/10 px-8 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-amber-100 transition hover:bg-amber-100 hover:text-slate-950"
             >
               Commencer l'immersion
+            </Link>
+            <Link
+              href="/garden"
+              className="inline-flex rounded-full border border-white/25 bg-white/5 px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 transition hover:border-white/45 hover:bg-white/10"
+            >
+              Retour au Jardin
             </Link>
           </motion.div>
         </div>
