@@ -1,0 +1,81 @@
+{
+  "name": "SEVE - SYSTEM - Progress State Guard",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seve/system/progress-state",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "Webhook_System_Progress_In",
+      "name": "Webhook System Progress In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst type = (body.type ?? '').toString().toLowerCase();\n\nif (type !== 'student_progress_snapshot') {\n  return [{\n    json: {\n      status: 'rejected',\n      reason: 'unsupported_type',\n      expectedType: 'student_progress_snapshot',\n      receivedType: type || 'unknown',\n      session: 'system',\n      receivedAt: new Date().toISOString()\n    }\n  }];\n}\n\nconst student = body.student ?? {};\nconst level = Number(student.level ?? 0);\nconst xp = Number(student.xp ?? 0);\nconst completedNodes = Array.isArray(student.completedNodes) ? student.completedNodes : [];\nconst unlockedNodes = Array.isArray(student.unlockedNodes) ? student.unlockedNodes : [];\nconst selectedSeed = student.selectedSeed ?? null;\n\nconst state = {\n  userId: student.userId ?? null,\n  selectedSeed,\n  level,\n  xp,\n  completedCount: completedNodes.length,\n  unlockedCount: unlockedNodes.length,\n  completedNodes,\n  unlockedNodes\n};\n\nconst issues = [];\nif (!selectedSeed) issues.push('seed_missing');\nif (completedNodes.length > unlockedNodes.length) issues.push('completed_gt_unlocked');\nif (level < 0 || xp < 0) issues.push('negative_progress');\n\nreturn [{\n  json: {\n    status: 'accepted',\n    session: 'system',\n    eventType: 'student_progress_snapshot',\n    state,\n    issues,\n    guard: {\n      progressionStateTrusted: issues.length === 0,\n      stateVersion: 'v1'\n    },\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "Code_Normalize_Progress_State",
+      "name": "Normalize Progress State",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "Respond_Progress_State",
+      "name": "Respond Progress State",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        820,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook System Progress In": {
+      "main": [
+        [
+          {
+            "node": "Normalize Progress State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Progress State": {
+      "main": [
+        [
+          {
+            "node": "Respond Progress State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "template": "seve-system-progress-state-guard-v1"
+  }
+}

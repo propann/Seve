@@ -17,6 +17,8 @@ Ce document est le backlog de travail n8n a suivre avant mise en production "ful
 - Le chat emet un payload de type `chat_message` (voir `lib/actions/chat.ts`).
 - Le greeting maitre peut etre branche sur n8n (`lib/n8n-service.ts`).
 - Le parcours Jardin inclut maintenant proposition + vote communautaire de cours.
+- La fiche personnage stocke le materiel par graine dans `profileData.seedEquipment`.
+- Le profil contient un bloc apprentissage exploitable pour IA (`age`, `experienceLevel`, `cognitiveProfile`).
 
 ## Architecture cible
 
@@ -37,10 +39,12 @@ Evenements minimum a gerer:
 - `chat_message`
 - `course_proposal`
 - `course_vote`
+- `student_progress_snapshot`
 
 Livrable workflow:
 
 - `n8n/workflows/system/seve-system-session-router.workflow.json`
+- `n8n/workflows/system/seve-system-progress-state-guard.workflow.json`
 
 ### Session PEDAGO (pedago.azoth.cloud)
 
@@ -56,10 +60,23 @@ Evenements minimum a gerer:
 - `exercise_submission`
 - `chat_message`
 - `course_proposal`
+- `aid_request`
 
 Livrable workflow:
 
 - `n8n/workflows/pedago/seve-pedago-session-router.workflow.json`
+- `n8n/workflows/pedago/seve-pedago-aid-recommender.workflow.json`
+
+## Garde-fous progression (anti recommandations incoherentes)
+
+Source de verite: [STUDENT_PROGRESS_STATE.md](/home/azoth/web/docs/STUDENT_PROGRESS_STATE.md)
+
+Regles appliquees dans les workflows:
+
+1. priorite a la meme graine (`selectedSeed`).
+2. validation materiel reel (`profileData.seedEquipment`).
+3. progression compatible (`level`, `completedNodes`, `xp`).
+4. fallback coach si aucun pair valide.
 
 ## Sequence de mise en place
 

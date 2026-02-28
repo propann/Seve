@@ -47,6 +47,11 @@ run_test \
   "${ROOT_DIR}/payloads/system/seed_selected.json"
 
 run_test \
+  "SYSTEM student_progress_snapshot" \
+  "${SYSTEM_BASE_URL}/webhook/seve/system/progress-state" \
+  "${ROOT_DIR}/payloads/system/student_progress_snapshot.json"
+
+run_test \
   "PEDAGO chat_message" \
   "${PEDAGO_BASE_URL}/webhook/seve/pedago/session-events" \
   "${ROOT_DIR}/payloads/pedago/chat_message.json"
@@ -55,5 +60,10 @@ run_test \
   "PEDAGO exercise_submission" \
   "${PEDAGO_BASE_URL}/webhook/seve/pedago/session-events" \
   "${ROOT_DIR}/payloads/pedago/exercise_submission.json"
+
+run_test \
+  "PEDAGO aid_request" \
+  "${PEDAGO_BASE_URL}/webhook/seve/pedago/aid-recommendation" \
+  "${ROOT_DIR}/payloads/pedago/aid_request.json"
 
 echo "All test payloads sent."

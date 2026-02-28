@@ -29,3 +29,12 @@ Exemples:
 - Les workflows fournis ici sont des bases "safe" pour bootstrap.
 - Adapter credentials, chemins webhook et destinations avant activation.
 - Ne pas committer de secrets/API keys dans ces JSON.
+
+## Workflows additionnels (surveillance + conseil)
+
+- `system/seve-system-progress-state-guard.workflow.json`
+  - normalise l etat d avancement eleve
+  - detecte incoherences minimales de progression
+- `pedago/seve-pedago-aid-recommender.workflow.json`
+  - recommande des pairs d aide selon materiel + progression
+  - bascule en `coach_fallback` si aucun pair compatible

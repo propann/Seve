@@ -30,6 +30,13 @@ Derniere mise a jour: 2026-02-28
 - Jardin transforme en page d'actualite principale:
   - hub central avec acces arbre, chat Mycelium et votes modules
   - retour au Jardin possible meme apres choix de graine
+- Fiche personnage etendue:
+  - profil apprentissage enrichi (age, profil cognitif, niveau, rythme)
+  - inventaire materiel par graine (`photographie`, `cinema`, `dessin`, `linux`)
+- Workflows n8n ajoutes pour supervision/conseil:
+  - `SEVE - SYSTEM - Progress State Guard`
+  - `SEVE - PEDAGO - Aid Recommender`
+  - payloads de test + doc source de verite avancement eleve
 - Fiabilisation infrastructure Coolify:
   - routage `azoth.cloud` repointe vers le conteneur applicatif courant
   - ancien conteneur app supprime apres bascule

@@ -1,0 +1,52 @@
+{
+  "type": "aid_request",
+  "seed": "photographie",
+  "resourceId": "scanner",
+  "requester": {
+    "userId": "usr_alice",
+    "name": "Alice",
+    "selectedSeed": "photographie",
+    "level": 1,
+    "xp": 650,
+    "completedNodes": ["0.1", "0.2"],
+    "profileData": {
+      "seedEquipment": {
+        "photographie": {
+          "mirrorless": 1,
+          "scanner": 0
+        }
+      }
+    }
+  },
+  "candidates": [
+    {
+      "userId": "usr_bob",
+      "name": "Bob",
+      "level": 2,
+      "xp": 1400,
+      "completedNodes": ["0.1", "0.2", "0.3", "1.1"],
+      "profileData": {
+        "seedEquipment": {
+          "photographie": {
+            "scanner": 1,
+            "analog_35": 1
+          }
+        }
+      }
+    },
+    {
+      "userId": "usr_cara",
+      "name": "Cara",
+      "level": 1,
+      "xp": 590,
+      "completedNodes": ["0.1", "0.2"],
+      "profileData": {
+        "seedEquipment": {
+          "photographie": {
+            "scanner": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -23,13 +23,15 @@ Tester au minimum:
 - `chat_message`
 - `course_proposal`
 - `seed_selected` (systeme)
+- `student_progress_snapshot` (systeme)
 - `exercise_submission` (pedago)
+- `aid_request` (pedago)
 
 Valider:
 
 - reponse HTTP 200
 - `status=accepted`
-- champs attendus (`eventType`, `nextAction`, `coachReply`)
+- champs attendus (`eventType`, `nextAction`, `coachReply`, `guard`)
 
 Commande test recommandee:
 

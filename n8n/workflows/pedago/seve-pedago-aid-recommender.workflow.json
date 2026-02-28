@@ -1,0 +1,81 @@
+{
+  "name": "SEVE - PEDAGO - Aid Recommender",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seve/pedago/aid-recommendation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "Webhook_Pedago_Aid_In",
+      "name": "Webhook Pedago Aid In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst type = (body.type ?? '').toString().toLowerCase();\n\nif (type !== 'aid_request') {\n  return [{\n    json: {\n      status: 'rejected',\n      reason: 'unsupported_type',\n      expectedType: 'aid_request',\n      receivedType: type || 'unknown',\n      session: 'pedago',\n      receivedAt: new Date().toISOString()\n    }\n  }];\n}\n\nconst requester = body.requester ?? {};\nconst candidates = Array.isArray(body.candidates) ? body.candidates : [];\nconst seed = (body.seed ?? requester.selectedSeed ?? '').toString();\nconst resourceId = (body.resourceId ?? '').toString();\n\nif (!seed || !resourceId) {\n  return [{\n    json: {\n      status: 'rejected',\n      reason: 'missing_seed_or_resource',\n      session: 'pedago',\n      eventType: 'aid_request',\n      receivedAt: new Date().toISOString()\n    }\n  }];\n}\n\nconst reqCompleted = Array.isArray(requester.completedNodes) ? requester.completedNodes.length : 0;\nconst reqLevel = Number(requester.level ?? 0);\nconst reqXp = Number(requester.xp ?? 0);\nconst reqId = requester.userId ?? null;\n\nconst recommendations = candidates\n  .filter((candidate) => candidate && candidate.userId && candidate.userId !== reqId)\n  .map((candidate) => {\n    const cProfile = candidate.profileData ?? {};\n    const cSeedEq = cProfile.seedEquipment?.[seed] ?? {};\n    const resourceQty = Number(cSeedEq[resourceId] ?? 0);\n\n    const cCompleted = Array.isArray(candidate.completedNodes) ? candidate.completedNodes.length : 0;\n    const cLevel = Number(candidate.level ?? 0);\n    const cXp = Number(candidate.xp ?? 0);\n\n    const levelGap = cLevel - reqLevel;\n    const completedGap = cCompleted - reqCompleted;\n    const xpGap = cXp - reqXp;\n\n    const hasResource = resourceQty > 0;\n    const progressionEligible = cLevel >= reqLevel && cCompleted >= reqCompleted;\n    const progressionTooFar = completedGap > 8;\n\n    const score = (hasResource ? 100 : 0) + Math.max(0, 15 - Math.abs(levelGap) * 3) + Math.max(0, 20 - Math.abs(completedGap) * 2) + Math.max(0, 10 - Math.floor(Math.abs(xpGap) / 300));\n\n    return {\n      userId: candidate.userId,\n      name: candidate.name ?? 'unknown',\n      resourceQty,\n      level: cLevel,\n      completedCount: cCompleted,\n      score,\n      guard: {\n        hasResource,\n        progressionEligible,\n        progressionTooFar\n      }\n    };\n  })\n  .filter((candidate) => candidate.guard.hasResource && candidate.guard.progressionEligible && !candidate.guard.progressionTooFar)\n  .sort((a, b) => b.score - a.score)\n  .slice(0, 5);\n\nconst safeToRecommend = recommendations.length > 0;\n\nreturn [{\n  json: {\n    status: 'accepted',\n    session: 'pedago',\n    eventType: 'aid_request',\n    nextAction: safeToRecommend ? 'peer_aid_suggestion' : 'coach_fallback',\n    safeToRecommend,\n    requester: {\n      userId: reqId,\n      seed,\n      resourceId,\n      level: reqLevel,\n      completedCount: reqCompleted\n    },\n    recommendations,\n    guard: {\n      requiredState: ['level', 'xp', 'completedNodes', 'selectedSeed', 'profileData.seedEquipment'],\n      sourceOfTruth: 'student_progress_snapshot + user_profile_data',\n      version: 'v1'\n    },\n    coachReply: safeToRecommend\n      ? 'Des pairs compatibles ont ete identifies selon le materiel disponible et l avancement.'\n      : 'Aucun pair strictement compatible. Basculer sur accompagnement coach ou entraide asynchrone.',\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "Code_Aid_Recommender",
+      "name": "Aid Recommender",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "Respond_Aid_Recommender",
+      "name": "Respond Aid Recommender",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        860,
+        280
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Pedago Aid In": {
+      "main": [
+        [
+          {
+            "node": "Aid Recommender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aid Recommender": {
+      "main": [
+        [
+          {
+            "node": "Respond Aid Recommender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "template": "seve-pedago-aid-recommender-v1"
+  }
+}
