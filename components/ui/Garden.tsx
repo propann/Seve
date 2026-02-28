@@ -24,6 +24,7 @@ const seeds = [
     icon: Film,
     featured: false,
     isReady: false,
+    presentationHref: "/dashboard/courses/cinema",
   },
   {
     key: "design",
@@ -32,6 +33,7 @@ const seeds = [
     icon: PenTool,
     featured: false,
     isReady: false,
+    presentationHref: "/dashboard/courses/dessin",
   },
   {
     key: "linux",
@@ -40,6 +42,7 @@ const seeds = [
     icon: Terminal,
     featured: false,
     isReady: false,
+    presentationHref: "/dashboard/courses/linux",
   },
 ];
 
@@ -253,10 +256,8 @@ export function Garden({ selectedSeed }: GardenProps) {
             const score = votes[seed.key] || 0;
             const isVoted = Boolean(votedByUser[seed.key]);
             return (
-              <button
+              <div
                 key={seed.key}
-                type="button"
-                onClick={() => voteForSeed(seed.key)}
                 className={`text-left rounded-2xl border p-4 transition-all ${
                   isVoted ? "border-seve/40 bg-seve/10" : "border-white/10 bg-white/[0.02] hover:border-white/20"
                 }`}
@@ -272,7 +273,25 @@ export function Garden({ selectedSeed }: GardenProps) {
                     <p className="text-[10px] uppercase tracking-widest text-white/40">votes</p>
                   </div>
                 </div>
-              </button>
+                <div className="mt-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => voteForSeed(seed.key)}
+                    className="inline-flex items-center gap-2 rounded-full border border-seve/30 bg-seve/15 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/20 transition-all"
+                  >
+                    {isVoted ? "Retirer vote" : "Voter"}
+                  </button>
+                  {seed.presentationHref && (
+                    <Link
+                      href={seed.presentationHref}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.03] px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white/80 hover:border-white/30 transition-all"
+                    >
+                      Voir presentation
+                      <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>
