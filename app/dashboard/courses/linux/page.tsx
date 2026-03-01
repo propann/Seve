@@ -136,7 +136,7 @@ export default function LinuxPresentationPage() {
               eyebrow={module.eyebrow}
               title={module.title}
               description={module.description}
-              bullets={module.bullets as string[]}
+              bullets={module.bullets}
               href={module.href}
               ctaLabel="Voir la feuille de route"
               delay={index * 0.09}

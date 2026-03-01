@@ -10,7 +10,7 @@ interface ModuleCardProps {
   description: string;
   href: string;
   eyebrow?: string;
-  bullets?: string[];
+  bullets?: readonly string[];
   ctaLabel?: string;
   delay?: number;
 }
