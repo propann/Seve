@@ -37,6 +37,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   const isAdmin = user?.role === "ADMIN" || user?.role === "TEACHER";
+  const isPhotographyPresentation = pathname === "/dashboard/courses/photographie";
   
   // On récupère tous les IDs de modules du cursus
   const allModuleIds = cursus.flatMap(level => level.modules).map(m => m.id);
@@ -60,15 +61,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex bg-[#0B0B0B] min-h-screen text-textMain selection:bg-seve selection:text-background font-sans">
-      {/* Sidebar Navigation connectée aux données réelles */}
-      <SidebarNavigation 
-        completedModules={progression.completedModules} 
-        unlockedModules={progression.unlockedModules} 
-        xp={progression.xp}
-      />
+      {/* Sidebar désactivée sur la page de présentation photographie */}
+      {!isPhotographyPresentation && (
+        <SidebarNavigation 
+          completedModules={progression.completedModules} 
+          unlockedModules={progression.unlockedModules} 
+          xp={progression.xp}
+        />
+      )}
 
       {/* Main Container */}
-      <main className="flex-1 relative overflow-hidden flex flex-col pt-24">
+      <main className={`flex-1 relative overflow-hidden flex flex-col ${isPhotographyPresentation ? "pt-0" : "pt-24"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}

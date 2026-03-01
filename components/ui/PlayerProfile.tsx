@@ -39,6 +39,7 @@ interface PlayerProfileProps {
   onComplete: (data: {
     name: string;
     characterClass: string;
+    avatar: string | null;
     profileData: LearningProfileData;
   }) => void;
 }
@@ -173,6 +174,8 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
   const [alignment, setAlignment] = useState(user?.alignment || 50);
   const [loading, setLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(true);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [statusTone, setStatusTone] = useState<"success" | "error" | "info">("info");
 
   const [characterClass, setCharacterClass] = useState(user?.characterClass || "Novice");
   const [age, setAge] = useState<number | "">(user?.profileData?.age ?? "");
@@ -209,12 +212,57 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const showStatus = (message: string, tone: "success" | "error" | "info" = "info") => {
+    setStatusMessage(message);
+    setStatusTone(tone);
+    window.setTimeout(() => setStatusMessage(""), 3000);
+  };
+
+  const optimizeAvatar = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Lecture image impossible."));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("Format image invalide."));
+        img.onload = () => {
+          const MAX_SIZE = 768;
+          const scale = Math.min(1, MAX_SIZE / Math.max(img.width, img.height));
+          const width = Math.max(1, Math.round(img.width * scale));
+          const height = Math.max(1, Math.round(img.height * scale));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Canvas non disponible."));
+            return;
+          }
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        img.src = String(reader.result || "");
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setAvatar(reader.result as string);
-      reader.readAsDataURL(file);
+      try {
+        const optimized = await optimizeAvatar(file);
+        setAvatar(optimized);
+        showStatus("Photo de profil prete a etre enregistree.", "info");
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Upload image impossible.";
+        showStatus(message, "error");
+      } finally {
+        e.target.value = "";
+      }
     }
   };
 
@@ -261,17 +309,18 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
       const result = await updateUserProfileAction(user.id, payload);
       if (result && result.success) {
         updateUser(payload);
-        alert("Identité scellée !");
+        showStatus("Identite scellee et enregistree.", "success");
         onComplete({
           name,
           characterClass,
+          avatar,
           profileData,
         });
       } else {
-        alert("Erreur de transmission.");
+        showStatus("Erreur de transmission.", "error");
       }
     } catch (err: any) {
-      alert(`Erreur : ${err.message}`);
+      showStatus(`Erreur : ${err.message}`, "error");
     } finally {
       setLoading(false);
     }
@@ -534,6 +583,19 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
             <button disabled={loading} onClick={handleSync} className="w-full py-10 bg-seve text-background font-black rounded-[40px] shadow-[0_0_50px_rgba(46,204,113,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-[0.8em] text-sm flex items-center justify-center gap-4">
               {loading ? <Loader2 className="animate-spin" /> : <><ShieldCheck className="w-6 h-6" /> SCELLER L'IDENTITÉ</>}
             </button>
+            {statusMessage && (
+              <p
+                className={`text-center text-[11px] font-bold tracking-wide ${
+                  statusTone === "success"
+                    ? "text-seve/90"
+                    : statusTone === "error"
+                      ? "text-red-400/90"
+                      : "text-white/60"
+                }`}
+              >
+                {statusMessage}
+              </p>
+            )}
           </div>
         </div>
       </motion.div>

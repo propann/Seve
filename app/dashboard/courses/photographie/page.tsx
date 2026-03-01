@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Aperture, Grid3X3, Sparkles, BookImage } from "lucide-react";
+import { Aperture, Grid3X3, Sparkles, BookImage, User } from "lucide-react";
 import { ModuleCard } from "@/components/course/ModuleCard";
 
 const modules = [
@@ -44,6 +44,25 @@ const gallery = [
 export default function PhotographyCoursePresentationPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
+      <section className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/85 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <Link
+            href="/garden"
+            className="inline-flex rounded-full border border-white/25 bg-white/5 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 transition hover:border-white/45 hover:bg-white/10"
+          >
+            Retour au Jardin
+          </Link>
+
+          <Link
+            href="/rituel"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-200/40 bg-amber-200/10 px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-100 transition hover:bg-amber-100 hover:text-slate-950"
+          >
+            <User className="h-4 w-4" />
+            Compte
+          </Link>
+        </div>
+      </section>
+
       <section className="relative overflow-hidden border-b border-white/10">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -168,6 +187,15 @@ export default function PhotographyCoursePresentationPage() {
               <img src={src} alt="Inspiration photographie" className="h-48 w-full object-cover md:h-56" />
             </motion.div>
           ))}
+        </div>
+
+        <div className="mt-12 flex justify-center">
+          <Link
+            href="/garden"
+            className="inline-flex rounded-full border border-white/25 bg-white/5 px-8 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 transition hover:border-white/45 hover:bg-white/10"
+          >
+            Retour au Jardin
+          </Link>
         </div>
       </section>
     </main>

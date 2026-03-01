@@ -18,8 +18,9 @@ export const UnifiedHeader = () => {
   const isDashboard = pathname === "/dashboard";
   const isLanding = pathname === "/";
   const isGarden = pathname === "/garden";
+  const isPhotographyPresentation = pathname === "/dashboard/courses/photographie";
 
-  if (isLanding || isGarden) {
+  if (isLanding || isGarden || isPhotographyPresentation) {
     return null;
   }
 
