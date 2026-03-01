@@ -34,6 +34,7 @@ import {
 import { useAuth } from "@/lib/auth/AuthContext";
 import { updateUserProfileAction } from "@/lib/actions/auth";
 import { CognitiveProfile, ExperienceLevel, LearningProfileData, SeedEquipmentMap, SeedKey } from "@/lib/types/profile";
+import { resolveAvatarUrl } from "@/lib/avatar-url";
 
 interface PlayerProfileProps {
   onComplete: (data: {
@@ -176,6 +177,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
   const [isScanning, setIsScanning] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
   const [statusTone, setStatusTone] = useState<"success" | "error" | "info">("info");
+  const [avatarFailedSrc, setAvatarFailedSrc] = useState<string | null>(null);
 
   const [characterClass, setCharacterClass] = useState(user?.characterClass || "Novice");
   const [age, setAge] = useState<number | "">(user?.profileData?.age ?? "");
@@ -189,6 +191,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
   const [primaryGoal, setPrimaryGoal] = useState(user?.profileData?.primaryGoal || "");
   const [notes, setNotes] = useState(user?.profileData?.notes || "");
   const inventory = aggregateSeedInventory(seedEquipment);
+  const avatarSrc = resolveAvatarUrl(avatar);
 
   const relics = (Object.keys(SEED_EQUIPMENT_CATALOG) as SeedKey[]).flatMap((seed) =>
     SEED_EQUIPMENT_CATALOG[seed]
@@ -254,9 +257,24 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
+        showStatus("Preparation de l'image...", "info");
         const optimized = await optimizeAvatar(file);
-        setAvatar(optimized);
-        showStatus("Photo de profil prete a etre enregistree.", "info");
+        showStatus("Upload vers le stockage...", "info");
+
+        const response = await fetch("/api/profile/avatar", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ dataUrl: optimized }),
+          credentials: "include",
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload?.success || !payload?.url) {
+          throw new Error(payload?.error || "Upload avatar impossible.");
+        }
+
+        setAvatarFailedSrc(null);
+        setAvatar(String(payload.url));
+        showStatus("Photo de profil uploadée et prête à être enregistrée.", "success");
       } catch (error) {
         const message = error instanceof Error ? error.message : "Upload image impossible.";
         showStatus(message, "error");
@@ -344,7 +362,16 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
         <div className="flex flex-col md:flex-row gap-12 items-center border-b border-white/5 pb-12 mb-12">
           <div className="relative group">
             <div className="w-48 h-48 rounded-full bg-seve/5 border border-seve/30 flex items-center justify-center overflow-hidden cursor-pointer relative shadow-2xl shadow-seve/10">
-              {avatar ? <img src={avatar} alt="Avatar" className="w-full h-full object-cover" /> : <Flask className="w-16 h-16 text-seve opacity-40" />}
+              {avatarSrc && avatarSrc !== avatarFailedSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                  onError={() => setAvatarFailedSrc(avatarSrc)}
+                />
+              ) : (
+                <Flask className="w-16 h-16 text-seve opacity-40" />
+              )}
               <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                 <Upload className="w-8 h-8 text-seve" />
                 <span className="text-[10px] font-black uppercase mt-2">Uploader</span>

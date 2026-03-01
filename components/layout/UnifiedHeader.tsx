@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthContext";
+import { resolveAvatarUrl } from "@/lib/avatar-url";
 import { TreePine, User as UserIcon, LogOut, ChevronRight, ArrowRight } from "lucide-react";
 
 /**
@@ -13,6 +14,8 @@ import { TreePine, User as UserIcon, LogOut, ChevronRight, ArrowRight } from "lu
 export const UnifiedHeader = () => {
   const pathname = usePathname() ?? "";
   const { user, logout } = useAuth();
+  const [avatarFailedSrc, setAvatarFailedSrc] = useState<string | null>(null);
+  const avatarSrc = resolveAvatarUrl(user?.avatar);
 
   const isCourse = pathname.includes("/courses/");
   const isDashboard = pathname === "/dashboard";
@@ -80,7 +83,16 @@ export const UnifiedHeader = () => {
                   <span className="block text-[8px] font-bold text-seve uppercase italic opacity-60 leading-none">{user.characterClass}</span>
                 </div>
                 <div className="w-10 h-10 rounded-full bg-seve/10 border border-seve/20 flex items-center justify-center text-seve group-hover:shadow-[0_0_15px_#2ECC7144] transition-all">
-                  <UserIcon className="w-5 h-5" />
+                  {avatarSrc && avatarSrc !== avatarFailedSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt={`Avatar de ${user.name}`}
+                      className="w-full h-full rounded-full object-cover"
+                      onError={() => setAvatarFailedSrc(avatarSrc)}
+                    />
+                  ) : (
+                    <UserIcon className="w-5 h-5" />
+                  )}
                 </div>
               </Link>
 
