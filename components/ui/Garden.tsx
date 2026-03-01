@@ -84,7 +84,7 @@ export function Garden({ selectedSeed }: GardenProps) {
     setVotedByUser(filteredVotedByUser);
   }, [votableSeeds]);
 
-  const selectSeed = async (seed: string) => {
+  const selectSeed = async (seed: string, nextHref?: string) => {
     setPendingSeed(seed);
     setError("");
     try {
@@ -98,7 +98,7 @@ export function Garden({ selectedSeed }: GardenProps) {
       if (!response.ok || !data.success) {
         throw new Error(data.error || "Impossible de choisir cette graine.");
       }
-      window.location.href = data.redirectTo || "/garden";
+      window.location.href = nextHref || data.redirectTo || "/garden";
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Erreur de selection.");
       setPendingSeed(null);
@@ -227,15 +227,15 @@ export function Garden({ selectedSeed }: GardenProps) {
               <p className="text-[10px] uppercase tracking-widest text-seve">Pret</p>
               <h4 className="text-lg font-black text-white uppercase mt-2">{seed.title}</h4>
               <p className="text-sm text-white/60 mt-2">Version actuelle exploitable pour la navigation et le test.</p>
-              {seed.presentationHref && (
-                <Link
-                  href={seed.presentationHref}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-seve/30 bg-seve/20 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/25 transition-all"
-                >
-                  Ouvrir la page de presentation
-                  <ChevronRight className="w-3 h-3" />
-                </Link>
-              )}
+              <button
+                type="button"
+                disabled={!!pendingSeed}
+                onClick={() => selectSeed(seed.key, seed.presentationHref)}
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-seve/30 bg-seve/20 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/25 transition-all disabled:opacity-60"
+              >
+                Planter la graine
+                <ChevronRight className="w-3 h-3" />
+              </button>
             </article>
           ))}
         </div>
@@ -246,7 +246,7 @@ export function Garden({ selectedSeed }: GardenProps) {
           <div>
             <h3 className="text-white text-xl md:text-2xl font-black uppercase">Vote des graines</h3>
             <p className="text-white/50 text-xs uppercase tracking-widest">
-              Test des votes pour Cinema, Dessin et Linux (pas de vote sur Photographie)
+              Propositions avant creation: le vote sert a decider quoi construire en premier
             </p>
           </div>
         </div>
@@ -279,17 +279,8 @@ export function Garden({ selectedSeed }: GardenProps) {
                     onClick={() => voteForSeed(seed.key)}
                     className="inline-flex items-center gap-2 rounded-full border border-seve/30 bg-seve/15 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-seve hover:bg-seve/20 transition-all"
                   >
-                    {isVoted ? "Retirer vote" : "Voter"}
+                    {isVoted ? "Retirer mon vote" : "Voter cette proposition"}
                   </button>
-                  {seed.presentationHref && (
-                    <Link
-                      href={seed.presentationHref}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.03] px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white/80 hover:border-white/30 transition-all"
-                    >
-                      Voir presentation
-                      <ChevronRight className="w-3 h-3" />
-                    </Link>
-                  )}
                 </div>
               </div>
             );

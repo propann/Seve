@@ -1,6 +1,6 @@
 # AI Collaboration Context - SEVE/Azoth
 
-Derniere mise a jour: 2026-02-28
+Derniere mise a jour: 2026-03-01
 
 But: permettre a toute IA qui rejoint le projet de comprendre rapidement ou on en est, ce qui est en production, et les prochaines actions prioritaires.
 
@@ -23,6 +23,16 @@ But: permettre a toute IA qui rejoint le projet de comprendre rapidement ou on e
 - Fiche personnage enrichie:
   - profil apprentissage (`age`, `cognitiveProfile`, `experienceLevel`, `weeklyHours`, etc.)
   - inventaire materiel par graine (`profileData.seedEquipment`)
+- Fiche personnage stabilisee UX:
+  - sauvegarde identite sans redirection forcee (reste sur `/rituel`)
+  - upload avatar reellement persiste en base (`User.avatar`) avec compression client
+  - message de confirmation discret (plus d alertes bloquantes)
+- Presentation photographie ajustee:
+  - suppression du bandeau global et de la sidebar sur la page de presentation
+  - navigation locale avec `Compte` + `Retour au Jardin` en haut, et retour conserve en bas
+- Jardin aligne sur logique produit:
+  - `Cours valides`: CTA `Planter la graine` (selection + redirection directe vers le cours correspondant)
+  - `Vote des graines`: mode propositions pre-creation uniquement (pas de lien presentation)
 - n8n templates ajoutes:
   - `SEVE - SYSTEM - Progress State Guard`
   - `SEVE - PEDAGO - Aid Recommender`
@@ -75,10 +85,11 @@ Action a faire ensuite:
 
 ## 7) Commits recents utiles (historique rapide)
 
+- `e2534e4` fix(build): accept readonly bullets in module cards
+- `0fd7fc4` feat(ui): adjust photo presentation nav and persist profile avatar
 - `1f4fdab` fix(auth): stabilize logout/login flow via API routes
 - `26e2be5` docs(project): unified backlog + template presentation
 - `bada659` feat(garden): route all seed buttons to presentation pages
 - `03a0b6d` feat(courses): redesign photographie presentation page
 - `7c8ccc2` feat(n8n): progress guard + peer aid recommender
 - `bdfe78c` feat(profile): seed-specific equipment tabs
-

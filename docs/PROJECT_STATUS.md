@@ -1,6 +1,6 @@
 # Statut Projet SEVE Web
 
-Derniere mise a jour: 2026-02-28
+Derniere mise a jour: 2026-03-01
 
 ## Resume executif
 
@@ -17,6 +17,19 @@ Derniere mise a jour: 2026-02-28
 - HTTPS sur `azoth.cloud` et `www.azoth.cloud`: OK
 
 ## Correctifs recents majeurs
+
+- Ajustements UX pages cours et jardin (session 2026-03-01):
+  - page presentation photographie epuree: masquage header global + sidebar gauche uniquement sur `/dashboard/courses/photographie`
+  - ajout navigation explicite sur la presentation photo: bouton `Compte` + `Retour au Jardin` en haut, maintien du retour en bas
+  - section `Cours valides` du Jardin: remplacement de `Ouvrir la page de presentation` par `Planter la graine` (selection + redirection directe vers le cours cible)
+  - section `Vote des graines`: repositionnee en mode propositions pre-creation (suppression du lien presentation, vote priorisation uniquement)
+- Fiche personnage (`/rituel`) stabilisee:
+  - suppression de la redirection auto vers dashboard apres `SCELLER L'IDENTITE` (l utilisateur reste sur la fiche)
+  - upload avatar fiabilise: optimisation client (resize/compression) puis persistance en base (`User.avatar`)
+  - feedback discret ajoute sous le bouton (succes/erreur), sans `alert` intrusive
+- Correctif build TypeScript deploiement:
+  - correction typing `readonly` sur les `bullets` du module Linux (compatibilite `ModuleCard`)
+  - suppression du cast fragile `as string[]` sur `/dashboard/courses/linux`
 
 - Stabilisation auth deconnexion/reconnexion:
   - migration des flux `/auth/sign-in` et `/auth/sign-up` vers routes API (`/api/auth/login`, `/api/auth/signup`)
