@@ -7,6 +7,7 @@ import { parseJsonWithFallback } from "@/lib/safe-json";
 import { createExerciseObjectKey, uploadBufferToS3 } from "@/lib/s3-upload";
 import { ExerciseReview, ExerciseSubmission, isLearningProfileData } from "@/lib/types/profile";
 import { cursus } from "@/lib/data/cursus";
+import { getExercisePromptConfig } from "@/lib/pedago/exercise-prompts";
 
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -48,6 +49,8 @@ function resolveReview(payload: unknown): {
   score: number | null;
   coachReply: string;
   provider: string;
+  issues: string[];
+  recommendations: string[];
 } {
   const data = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
   const approved = data.approved === true;
@@ -55,6 +58,10 @@ function resolveReview(payload: unknown): {
   const rawScore = data.score;
   const score = typeof rawScore === "number" && Number.isFinite(rawScore) ? rawScore : null;
   const coachReply = String(data.coachReply || data.feedback || "").trim();
+  const issues = Array.isArray(data.issues) ? data.issues.filter((item): item is string => typeof item === "string") : [];
+  const recommendations = Array.isArray(data.recommendations)
+    ? data.recommendations.filter((item): item is string => typeof item === "string")
+    : [];
 
   let status: ExerciseReview["status"] = "pending";
   if (approved) status = "approved";
@@ -72,6 +79,8 @@ function resolveReview(payload: unknown): {
         ? "Exercice valide. Le module suivant est debloque."
         : "Exercice recu. En attente de correction ou ajustements demandes."),
     provider: String(data.provider || "n8n"),
+    issues,
+    recommendations,
   };
 }
 
@@ -86,6 +95,8 @@ async function requestN8nCorrection(payload: Record<string, unknown>) {
       score: null,
       coachReply: "Correction IA indisponible: webhook n8n non configure.",
       provider: "local",
+      issues: ["Webhook n8n non configure."],
+      recommendations: ["Configurer N8N_PEDAGO_EXERCISE_WEBHOOK_URL dans l'environnement."],
     };
   }
 
@@ -112,6 +123,8 @@ async function requestN8nCorrection(payload: Record<string, unknown>) {
         score: null,
         coachReply: `Erreur correction IA (${response.status}).`,
         provider: "n8n",
+        issues: [`Webhook a repondu ${response.status}.`],
+        recommendations: ["Verifier logs n8n et format JSON de reponse."],
       };
     }
 
@@ -123,6 +136,8 @@ async function requestN8nCorrection(payload: Record<string, unknown>) {
       score: null,
       coachReply: "Timeout ou erreur reseau pendant la correction IA.",
       provider: "n8n",
+      issues: ["Timeout ou erreur reseau vers n8n."],
+      recommendations: ["Verifier connectivite, URL webhook et timeout workflow."],
     };
   } finally {
     clearTimeout(timeout);
@@ -201,6 +216,7 @@ export async function POST(request: Request) {
       size: parsed.bytes.byteLength,
       submittedAt: new Date().toISOString(),
     };
+    const promptConfig = getExercisePromptConfig(moduleId);
 
     const completedList = toNodeList(userRecord.completedNodes, []);
     const unlockedList = toNodeList(userRecord.unlockedNodes, ["0.1"]);
@@ -216,6 +232,10 @@ export async function POST(request: Request) {
       mimeType: submission.mimeType,
       size: submission.size,
       submittedAt: submission.submittedAt,
+      evaluationPrompt: promptConfig.prompt,
+      evaluationObjective: promptConfig.objective,
+      evaluationChecklist: promptConfig.checklist,
+      rejectionHints: promptConfig.rejectionHints,
       xp: userRecord.xp,
       level: userRecord.level,
       completedNodes: completedList,
@@ -232,6 +252,8 @@ export async function POST(request: Request) {
       score: correction.score,
       coachReply: correction.coachReply,
       provider: correction.provider,
+      issues: correction.issues,
+      recommendations: correction.recommendations,
       reviewedAt: new Date().toISOString(),
     };
 

@@ -122,10 +122,9 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
       }
 
       setStatus("success");
-      setFeedback(
-        payload.review?.coachReply ||
-          "Epreuve enregistree. Correction IA en cours."
-      );
+      const coachReply = payload.review?.coachReply || "Epreuve enregistree. Correction IA en cours.";
+      const firstRecommendation = payload.review?.recommendations?.[0];
+      setFeedback(firstRecommendation ? `${coachReply} Conseil: ${firstRecommendation}` : coachReply);
       setFile(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload image impossible.";
