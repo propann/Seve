@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Check, Loader2, Camera, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
-import { ExerciseSubmission } from "@/lib/types/profile";
+import { ExerciseReview, ExerciseSubmission } from "@/lib/types/profile";
 
 interface UploadExerciseProps {
   moduleId: string;
@@ -88,6 +88,13 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
         success?: boolean;
         error?: string;
         submission?: ExerciseSubmission;
+        review?: ExerciseReview;
+        progression?: {
+          xp: number;
+          level: number;
+          completedNodes: string[];
+          unlockedNodes: string[];
+        };
       };
 
       if (!response.ok || !payload?.success || !payload.submission) {
@@ -98,16 +105,27 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
         const currentSubmissions = Array.isArray(user.profileData?.exerciseSubmissions)
           ? user.profileData.exerciseSubmissions
           : [];
+        const currentReviews = Array.isArray(user.profileData?.exerciseReviews)
+          ? user.profileData.exerciseReviews
+          : [];
         updateUser({
+          xp: payload.progression?.xp ?? user.xp,
+          level: payload.progression?.level ?? user.level,
+          completedNodes: payload.progression?.completedNodes ?? user.completedNodes,
+          unlockedNodes: payload.progression?.unlockedNodes ?? user.unlockedNodes,
           profileData: {
             ...(user.profileData || {}),
             exerciseSubmissions: [payload.submission, ...currentSubmissions].slice(0, 40),
+            exerciseReviews: payload.review ? [payload.review, ...currentReviews].slice(0, 80) : currentReviews,
           },
         });
       }
 
       setStatus("success");
-      setFeedback("Epreuve enregistree dans votre fiche eleve. Analyse IA en file d'attente.");
+      setFeedback(
+        payload.review?.coachReply ||
+          "Epreuve enregistree. Correction IA en cours."
+      );
       setFile(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload image impossible.";
