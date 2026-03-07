@@ -13,6 +13,20 @@ export interface ExerciseSubmission {
   submittedAt: string;
 }
 
+export interface ExerciseReview {
+  id: string;
+  submissionId: string;
+  moduleId: string;
+  approved: boolean;
+  status: "approved" | "rejected" | "needs_revision" | "pending" | "error";
+  score?: number | null;
+  coachReply: string;
+  provider: string;
+  issues?: string[];
+  recommendations?: string[];
+  reviewedAt: string;
+}
+
 export interface LearningProfileData {
   age?: number | null;
   cognitiveProfile?: CognitiveProfile;
@@ -22,6 +36,7 @@ export interface LearningProfileData {
   notes?: string;
   seedEquipment?: SeedEquipmentMap;
   exerciseSubmissions?: ExerciseSubmission[];
+  exerciseReviews?: ExerciseReview[];
 }
 
 export function isLearningProfileData(value: unknown): value is LearningProfileData {
@@ -68,6 +83,32 @@ export function isLearningProfileData(value: unknown): value is LearningProfileD
           typeof row.submittedAt === "string"
         );
       }));
+  const validExerciseReviews =
+    data.exerciseReviews === undefined ||
+    (Array.isArray(data.exerciseReviews) &&
+      data.exerciseReviews.every((entry) => {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) return false;
+        const row = entry as Record<string, unknown>;
+        return (
+          typeof row.id === "string" &&
+          typeof row.submissionId === "string" &&
+          typeof row.moduleId === "string" &&
+          typeof row.approved === "boolean" &&
+          (row.status === "approved" ||
+            row.status === "rejected" ||
+            row.status === "needs_revision" ||
+            row.status === "pending" ||
+            row.status === "error") &&
+          (row.score === undefined || row.score === null || typeof row.score === "number") &&
+          typeof row.coachReply === "string" &&
+          typeof row.provider === "string" &&
+          (row.issues === undefined ||
+            (Array.isArray(row.issues) && row.issues.every((entry) => typeof entry === "string"))) &&
+          (row.recommendations === undefined ||
+            (Array.isArray(row.recommendations) && row.recommendations.every((entry) => typeof entry === "string"))) &&
+          typeof row.reviewedAt === "string"
+        );
+      }));
 
   return (
     validAge &&
@@ -77,6 +118,7 @@ export function isLearningProfileData(value: unknown): value is LearningProfileD
     validPrimaryGoal &&
     validNotes &&
     validSeedEquipment &&
-    validExerciseSubmissions
+    validExerciseSubmissions &&
+    validExerciseReviews
   );
 }
