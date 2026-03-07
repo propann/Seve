@@ -57,6 +57,16 @@ export function createAvatarObjectKey(userId: string, extension: string): string
   return `avatars/${userId}/${Date.now()}-${randomUUID()}.${cleanExt}`;
 }
 
+export function createExerciseObjectKey(userId: string, moduleId: string, extension: string): string {
+  const cleanExt = extension.replace(/[^a-zA-Z0-9]/g, "").toLowerCase() || "jpg";
+  const cleanModuleId = moduleId
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "module";
+  return `exercises/${userId}/${cleanModuleId}/${Date.now()}-${randomUUID()}.${cleanExt}`;
+}
+
 export async function uploadBufferToS3(key: string, contentType: string, body: Buffer): Promise<{ key: string; url: string }> {
   const cfg = getS3Config();
   const endpoint = new URL(cfg.endpoint);

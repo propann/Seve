@@ -33,7 +33,13 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { updateUserProfileAction } from "@/lib/actions/auth";
-import { CognitiveProfile, ExperienceLevel, LearningProfileData, SeedEquipmentMap, SeedKey } from "@/lib/types/profile";
+import {
+  CognitiveProfile,
+  ExperienceLevel,
+  LearningProfileData,
+  SeedEquipmentMap,
+  SeedKey,
+} from "@/lib/types/profile";
 import { resolveAvatarUrl } from "@/lib/avatar-url";
 
 interface PlayerProfileProps {
@@ -198,6 +204,9 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
       .filter((item) => (seedEquipment[seed]?.[item.id] || 0) > 0)
       .map((item) => ({ ...item, seed }))
   );
+  const exerciseSubmissions = Array.isArray(user?.profileData?.exerciseSubmissions)
+    ? user.profileData.exerciseSubmissions
+    : [];
 
   useEffect(() => {
     const hasAnalog = (inventory.analog_35 || 0) + (inventory.analog_mf || 0) + (inventory.chambre || 0) > 0;
@@ -306,6 +315,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
     setLoading(true);
     
     const profileData: LearningProfileData = {
+      ...(user?.profileData || {}),
       age: age === "" ? null : age,
       cognitiveProfile,
       experienceLevel,
@@ -313,6 +323,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
       primaryGoal: primaryGoal.trim(),
       notes: notes.trim(),
       seedEquipment,
+      exerciseSubmissions,
     };
 
     const payload = {
@@ -408,6 +419,33 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
                   <span className="text-[10px] uppercase tracking-widest text-white/45">{SEED_LABELS[relic.seed]}</span>
                   <span className="text-sm font-black text-seve ml-2 bg-seve/10 px-2 rounded-lg">x{seedEquipment[relic.seed]?.[relic.id] || 0}</span>
                 </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {exerciseSubmissions.length > 0 && (
+          <div className="mb-16 p-10 bg-white/[0.02] border border-white/10 rounded-[40px] space-y-6">
+            <h3 className="text-xs font-black text-seve uppercase tracking-[0.5em] flex items-center gap-3">
+              <Camera className="w-4 h-4" /> Epreuves enregistrees
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {exerciseSubmissions.slice(0, 6).map((submission) => (
+                <a
+                  key={submission.id}
+                  href={submission.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:border-seve/40 transition-colors"
+                >
+                  <img src={submission.imageUrl} alt={`Epreuve ${submission.moduleId}`} className="w-full h-36 object-cover" />
+                  <div className="p-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-seve">Module {submission.moduleId}</p>
+                    <p className="text-[10px] text-white/50 mt-1">
+                      {new Date(submission.submittedAt).toLocaleString("fr-FR")}
+                    </p>
+                  </div>
+                </a>
               ))}
             </div>
           </div>
