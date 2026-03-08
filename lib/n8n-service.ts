@@ -5,7 +5,12 @@
 
 const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
 
-export async function triggerMasterGreeting(profileData: any) {
+type GreetingProfile = {
+  characterClass?: string;
+  [key: string]: unknown;
+};
+
+export async function triggerMasterGreeting(profileData: GreetingProfile) {
   if (!N8N_WEBHOOK_URL) {
     console.warn("n8n URL missing. Simulating Master Greeting...");
     return {
@@ -21,7 +26,7 @@ export async function triggerMasterGreeting(profileData: any) {
     });
 
     return await response.json();
-  } catch (error) {
+  } catch {
     return { error: "Silence du Maître... Vérifiez la connexion n8n." };
   }
 }

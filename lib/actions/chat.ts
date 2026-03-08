@@ -81,8 +81,8 @@ export async function sendMessageAction(userId: string, roomSlug: string, text: 
 
     revalidatePath(`/dashboard/mycelium`);
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erreur envoi message:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : "Erreur envoi message." };
   }
 }

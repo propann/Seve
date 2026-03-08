@@ -5,7 +5,7 @@ import { LectureLayout, Hook, Immersion } from "@/components/layout/LectureLayou
 import { KnowledgeNode } from "@/components/ui/KnowledgeNode";
 import { DOFVisualizer } from "@/components/interactive/DOFVisualizer";
 import { UploadExercise } from "@/components/ui/UploadExercise";
-import { Microscope, Zap, Droplets } from "lucide-react";
+import { Microscope } from "lucide-react";
 
 /**
  * MODULE B2.N.2 : LE MONDE MINIATURE

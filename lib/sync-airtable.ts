@@ -8,7 +8,7 @@ const BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID;
 
 export interface ProfileData {
   name: string;
-  inventory: any;
+  inventory: Record<string, number>;
   skills: string[];
   alignment: number;
   characterClass: string;
@@ -54,7 +54,7 @@ export async function syncStudentProfile(profileData: ProfileData) {
       const err = await response.json();
       return { success: false, message: "Erreur de racines : " + err.error.message };
     }
-  } catch (error) {
+  } catch {
     return { success: false, message: "Échec de connexion au Mycélium." };
   }
 }

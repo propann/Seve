@@ -86,7 +86,7 @@ export async function loginUserAction(email: string, passwordRaw: string) {
       };
     }
     return { success: false, error: "Mot de passe incorrect." };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Erreur de base locale." };
   }
 }
@@ -106,7 +106,18 @@ export async function logoutUserAction() {
 /**
  * ACTION SERVEUR : Mise à jour du Profil riche (IA-Ready)
  */
-export async function updateUserProfileAction(userId: string, data: any) {
+type UserProfileUpdateInput = {
+  name?: string;
+  avatar?: string | null;
+  os?: string | null;
+  characterClass?: string;
+  alignment?: number;
+  inventory?: Record<string, number>;
+  software?: string[];
+  profileData?: unknown;
+};
+
+export async function updateUserProfileAction(userId: string, data: UserProfileUpdateInput) {
   try {
     if (!userId) return { success: false, error: "ID Utilisateur manquant." };
 

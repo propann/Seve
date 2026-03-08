@@ -18,7 +18,7 @@ Frontend principal servi sur `azoth.cloud`.
 - Sélection de graine (`/garden`) persistée en PostgreSQL
 - `/garden` est la page principale après connexion/reconnexion
 - Le Jardin sert de hub: choix de graine (1re fois), votes modules et chat Mycélium
-- Protection de routes via middleware (`/dashboard`, `/rituel`, `/garden`, `/admin`)
+- Protection de routes via `proxy.ts` (`/dashboard`, `/rituel`, `/garden`, `/admin`)
 - Hub admin (`/admin`) réservé aux rôles `ADMIN` et `TEACHER`
 
 ## Monétisation et progression (règles 2026)
@@ -44,7 +44,7 @@ Application locale: `http://localhost:3000`
 
 ```bash
 npm run lint
-npm run build -- --webpack
+npm run build
 ```
 
 Notes:
@@ -54,7 +54,7 @@ Notes:
 ## Build production
 
 ```bash
-npm run build -- --webpack
+npm run build
 npm run start -- --hostname 127.0.0.1 --port 3000
 ```
 
@@ -64,6 +64,8 @@ npm run start -- --hostname 127.0.0.1 --port 3000
 - `AUTH_SESSION_SECRET` (signature des cookies de session, min 32 caractères)
 - `RESEND_API_KEY` (emails transactionnels)
 - `CLERK_WEBHOOK_SECRET` (webhook Clerk, si activé)
+- `N8N_PEDAGO_EXERCISE_WEBHOOK_URL` (correction exercice)
+- `N8N_PEDAGO_WEBHOOK_SECRET` (secret webhook correction exercice)
 
 ## API Auth
 
@@ -98,6 +100,13 @@ Ce projet est prêt pour un déploiement conteneurisé via Coolify:
 7. Activer l'auto-deploy sur `push` (webhook Git).
 
 Chaque `git push` sur la branche configurée déclenche un nouveau build et déploiement automatique.
+
+## Workflow exercice 0.1
+
+- Module `0.1` demande 2 preuves visuelles: le dispositif stenope puis la trace lumineuse.
+- Le composant d upload autorise 2 images sur [m0-1/page.tsx](/home/azoth/web/app/dashboard/courses/m0-1/page.tsx).
+- L API [route.ts](/home/azoth/web/app/api/profile/exercise/route.ts) transmet les assets vers n8n et persiste la review dans `profileData`.
+- Le workflow cible est `SEVE - PEDAGO - Exercise Review` sur `pedago.azoth.cloud`.
 
 ## Structure du dépôt
 

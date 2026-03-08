@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cursus } from "@/lib/data/cursus";
-import { CheckCircle2, Circle, Lock, Zap, TreePine, LogOut, Home, ShieldAlert, MessageCircle } from "lucide-react";
+import { CheckCircle2, Circle, Lock, Zap, TreePine, LogOut, ShieldAlert, MessageCircle } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 
 interface SidebarProps {

@@ -3,8 +3,6 @@
  * "L'Ancrage des Âmes" : Synchronisation Clerk <-> Airtable
  */
 
-import { syncStudentProfile } from "./sync-airtable";
-
 const AIRTABLE_API_KEY = process.env.NEXT_PUBLIC_AIRTABLE_API_KEY;
 const BASE_ID = process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID;
 

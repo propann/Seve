@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Terminal, Shield, Eye, Zap, Database, ArrowRight } from "lucide-react";
+import { Shield, Eye, Zap, Database, ArrowRight } from "lucide-react";
 import { EvolutionaryAvatar } from "@/components/ui/EvolutionaryAvatar";
 
 export default function DebugPage() {

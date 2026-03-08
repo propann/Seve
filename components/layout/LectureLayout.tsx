@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { ChevronLeft, ChevronRight, Zap, TreePine, Home } from "lucide-react";
+import { ChevronLeft, ChevronRight, Zap, TreePine } from "lucide-react";
 import Link from "next/link";
 
 interface LectureLayoutProps {
@@ -14,7 +14,7 @@ interface LectureLayoutProps {
   nextSlug?: string;
 }
 
-export const LectureLayout: React.FC<LectureLayoutProps> = ({ children, level, title, prevSlug, nextSlug }) => {
+export const LectureLayout: React.FC<LectureLayoutProps> = ({ children, prevSlug, nextSlug }) => {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,

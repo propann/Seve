@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Aperture, Timer, Zap, AlertTriangle, Check } from "lucide-react";
 
@@ -12,21 +12,10 @@ export const ExposureSim = () => {
   const [aperture, setAperture] = useState(2.8); // f/1.8 to f/22
   const [shutter, setShutter] = useState(125);   // 1/1s to 1/4000s (index)
   const [iso, setIso] = useState(100);           // 100 to 12800
-
-  const [exposure, setExposure] = useState(0);
-
-  // Logique simplifiée de calcul d'exposition (EV)
-  useEffect(() => {
-    // Plus l'ouverture est petite (chiffre grand), moins il y a de lumière
-    const apertureEffect = Math.log2(aperture ** 2);
-    // Plus la vitesse est rapide, moins il y a de lumière
-    const shutterEffect = Math.log2(shutter);
-    // Plus l'ISO est haut, plus il y a de lumière
-    const isoEffect = Math.log2(iso / 100);
-
-    const ev = isoEffect - (apertureEffect + shutterEffect) + 14; // Base 14 pour l'équilibre
-    setExposure(ev);
-  }, [aperture, shutter, iso]);
+  const apertureEffect = Math.log2(aperture ** 2);
+  const shutterEffect = Math.log2(shutter);
+  const isoEffect = Math.log2(iso / 100);
+  const exposure = isoEffect - (apertureEffect + shutterEffect) + 14;
 
   const getStatus = () => {
     if (exposure < 13) return { label: "SOUS-EXPOSÉ", color: "text-blue-400", bg: "bg-blue-400/10" };

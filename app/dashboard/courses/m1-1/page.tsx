@@ -5,7 +5,6 @@ import { LectureLayout, Hook, Immersion, ScienceWell } from "@/components/layout
 import { KnowledgeNode } from "@/components/ui/KnowledgeNode";
 import { ExposureSim } from "@/components/interactive/ExposureSim";
 import { UploadExercise } from "@/components/ui/UploadExercise";
-import { motion } from "framer-motion";
 import { Aperture, Timer, Zap, ShieldCheck } from "lucide-react";
 
 /**

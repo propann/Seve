@@ -3,21 +3,19 @@ import type { NextRequest } from 'next/server';
 import { verifySessionToken } from '@/lib/session-token';
 
 /**
- * LE GARDIEN INTERNE : Protège les racines de l'Arbre.
- * Utilise les cookies de session interne.
+ * Garde des routes privees via cookie de session interne.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get('arbre_session')?.value;
   const session = await verifySessionToken(token);
 
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || 
-                         request.nextUrl.pathname.startsWith('/rituel') ||
-                         request.nextUrl.pathname.startsWith('/garden') ||
-                         request.nextUrl.pathname.startsWith('/admin');
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') ||
+    request.nextUrl.pathname.startsWith('/rituel') ||
+    request.nextUrl.pathname.startsWith('/garden') ||
+    request.nextUrl.pathname.startsWith('/admin');
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
 
-  // Si la route est protégée et qu'il n'y a pas de session
   if (isProtectedRoute && !session) {
     return NextResponse.redirect(new URL('/', request.url));
   }

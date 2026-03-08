@@ -1,6 +1,6 @@
 # Runbook Operations (Prod)
 
-Etat courant (2026-02-28):
+Etat courant (2026-03-08):
 - Frontal internet: `coolify-proxy` (Traefik) sur ports `80/443`
 - Services legacy arretes/desactives: `seve-web`, `pm2-azoth`, `nginx`
 - Routage dynamique: `/data/coolify/proxy/dynamic/azoth-public.yaml`
@@ -24,6 +24,7 @@ Etat courant (2026-02-28):
   - `/auth/sign-in`
   - `/dashboard`
   - `/api/auth/me`
+  - `/dashboard/courses/m0-1`
   - navigation fin de cours -> `/garden`
 - Verifier logs Coolify:
   - build termine sans erreur
@@ -58,6 +59,25 @@ Objectif: garantir que le Jardin reste le hub principal.
    - bouton `Retour au Jardin` -> navigation `/garden` sans logout
    - bouton `Deconnexion` -> suppression session puis retour portail `/`
 
+## 3.2) Verification fonctionnelle correction exercice 0.1 (critique pedago)
+
+Objectif: garantir que le workflow de correction du stenope applique bien la consigne reelle du module `0.1`.
+
+1. Ouvrir `https://azoth.cloud/dashboard/courses/m0-1`.
+2. Verifier l enonce:
+   - image 1 = dispositif physique du stenope
+   - image 2 = trace/projection lumineuse
+3. Selectionner 2 images maximum dans le composant d upload.
+4. Soumettre et verifier:
+   - l API `POST /api/profile/exercise` repond `success: true`
+   - la review contient `approved`, `status`, `coachReply`, `provider`
+   - si 1 seule image est fournie, le statut attendu est `needs_revision`
+   - si 2 preuves suffisantes sont fournies et la correction approuve, le module suivant est debloque
+5. En cas d erreur reseau n8n:
+   - verifier `N8N_PEDAGO_EXERCISE_WEBHOOK_URL`
+   - verifier `N8N_PEDAGO_WEBHOOK_SECRET`
+   - relancer le test payload: [test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh)
+
 ## 4) Rollback rapide
 
 Option Coolify:
@@ -86,6 +106,11 @@ Checklist rapide:
 3. Si erreur Prisma: verifier `npx prisma generate` dans Dockerfile.
 4. Si erreur env au build: eviter l'instanciation globale de clients dependants de secrets.
 5. Commit fix + push pour relancer le pipeline.
+
+Cas concret deja observe le 2026-03-08:
+- un ancien process `next build` orphelin gardait `.next/lock`
+- symptome: `Unable to acquire lock at /home/azoth/web/.next/lock`
+- correction: terminer le process orphelin puis relancer `npm run build`
 
 ## 6) Incident: site down apres redeploy
 

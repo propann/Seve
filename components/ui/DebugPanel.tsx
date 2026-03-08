@@ -10,12 +10,12 @@ import { Terminal, Shield, Activity, Database, Check, AlertTriangle } from "luci
  */
 export const DebugPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [logs, setLogs] = useState([
+  const logs = [
     { id: 1, type: "system", msg: "Initialisation Node R0.1...", time: "11:42:01" },
     { id: 2, type: "ai_vision", msg: "Scan Hugging Face : Détection règle des tiers [85%]", time: "11:42:05" },
     { id: 3, type: "ai_llm", msg: "Groq (Llama 3) : Génération feedback 'Alchimiste'...", time: "11:42:07" },
     { id: 4, type: "db", msg: "Airtable Sync : XP +25 enregistrés.", time: "11:42:08" }
-  ]);
+  ];
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] font-mono">

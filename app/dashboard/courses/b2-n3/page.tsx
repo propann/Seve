@@ -5,7 +5,7 @@ import { LectureLayout, Hook, Immersion } from "@/components/layout/LectureLayou
 import { KnowledgeNode } from "@/components/ui/KnowledgeNode";
 import { ShutterSim } from "@/components/interactive/ShutterSim";
 import { UploadExercise } from "@/components/ui/UploadExercise";
-import { Bird, Zap, ShieldCheck } from "lucide-react";
+import { Bird, ShieldCheck } from "lucide-react";
 
 /**
  * MODULE B2.N.3 : L'ÉTHIQUE DU VIVANT

@@ -4,7 +4,6 @@ import React from "react";
 import { LectureLayout, Hook, Immersion, ScienceWell } from "@/components/layout/LectureLayout";
 import { KnowledgeNode } from "@/components/ui/KnowledgeNode";
 import { UploadExercise } from "@/components/ui/UploadExercise";
-import { motion } from "framer-motion";
 import { Zap, Activity } from "lucide-react";
 
 /**

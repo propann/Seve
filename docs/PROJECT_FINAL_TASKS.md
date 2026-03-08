@@ -1,6 +1,6 @@
 # Backlog Final Projet SEVE
 
-Derniere mise a jour: 2026-02-28
+Derniere mise a jour: 2026-03-08
 
 Objectif: regrouper en un seul endroit tout ce qu il reste a faire pour terminer le projet.
 
@@ -64,6 +64,7 @@ Format de presentation obligatoire (template v1):
 
 - [x] Templates importables versionnes
 - [x] Payloads de test et script de test
+- [x] Verifier la coherence du flux exercice `0.1` (double preuve UI + API + workflow n8n)
 - [ ] Import reel dans les 2 instances n8n + activation controlee
 - [ ] Secret webhook partage + verification signature partout
 - [ ] Alerting erreur workflow (Slack/email)
@@ -71,7 +72,10 @@ Format de presentation obligatoire (template v1):
 
 ## 7) Qualite technique
 
-- [ ] Reduire warnings lint prioritaires (`any`, refs en render)
+- [~] Reduire warnings lint prioritaires (`any`, refs en render)
+- [x] Corriger le drift session client entre cookie serveur et fallback local
+- [x] Migrer `middleware.ts` vers `proxy.ts` (Next.js 16)
+- [x] Corriger les renders instables les plus visibles (`refs` et `Math.random()` en render, exposition derivee)
 - [ ] Ajouter tests critiques auth/session/navigation
 - [ ] Ajouter tests sur routes API n8n/profil
 - [ ] CI obligatoire: lint + build + tests avant merge
@@ -82,6 +86,7 @@ Format de presentation obligatoire (template v1):
 ## 8) Mise en production finale
 
 - [ ] Validation fonctionnelle end-to-end sur domaine prod
+- [ ] Tester en prod/staging la correction exercice `0.1` avec 2 images reelles et verifier l unlock du module suivant
 - [ ] Validation charge legere + monitoring
 - [ ] Audit securite des secrets/env
 - [ ] Validation restoration backup

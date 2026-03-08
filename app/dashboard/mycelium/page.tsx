@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { MyceliumChat } from "@/components/ui/MyceliumChat";
-import { Hash, Users, Sparkles, MessageSquare } from "lucide-react";
+import { Users, Sparkles, MessageSquare } from "lucide-react";
 
 const ROOMS = [
   { slug: "general", name: "Le Mycélium (Général)", icon: Users, desc: "Échanges libres entre explorateurs" },

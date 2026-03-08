@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Sun, Wind, Palette, Zap } from "lucide-react";
+import { Sun, Palette, Zap } from "lucide-react";
 
 /**
  * COLOR HARMONY TOOL
@@ -42,7 +43,7 @@ export const ColorHarmonyTool = () => {
                 animate={{ backgroundColor: getKelvinColor(kelvin) }}
                 className="absolute inset-0 z-10 pointer-events-none"
             />
-            <img src="/image.jpg" alt="Test" className="w-full h-full object-cover opacity-60 grayscale" />
+            <Image src="/image.jpg" alt="Test" fill sizes="100vw" className="object-cover opacity-60 grayscale" />
             <div className="absolute bottom-4 left-4 z-20">
                 <p className="text-[10px] font-black text-white/60 uppercase bg-black/40 px-3 py-1 rounded-full backdrop-blur-md">
                     {kelvin < 4000 ? "Ambiance Intimiste / Golden Hour" : kelvin > 7000 ? "Ambiance Froide / Heure Bleue" : "Balance Neutre (Daylight)"}

@@ -6,7 +6,7 @@ import { KnowledgeNode } from "@/components/ui/KnowledgeNode";
 import { PerspectiveTool } from "@/components/interactive/PerspectiveTool";
 import { NDFilterCalculator } from "@/components/interactive/NDFilterCalculator";
 import { UploadExercise } from "@/components/ui/UploadExercise";
-import { Building2, Zap, Timer } from "lucide-react";
+import { Timer } from "lucide-react";
 
 /**
  * MODULE B2.U.3 : LA VILLE FANTÔME

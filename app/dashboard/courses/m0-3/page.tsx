@@ -8,7 +8,7 @@ import { VanishingText } from "@/components/ui/VanishingText";
 import { TimeSlicer } from "@/components/ui/TimeSlicer";
 import { GlossaryTerm } from "@/components/ui/GlossaryTerm";
 import { motion } from "framer-motion";
-import { Ghost, Clock, ShieldCheck, Camera, Heart } from "lucide-react";
+import { Ghost, ShieldCheck, Camera, Heart } from "lucide-react";
 
 /**
  * MODULE 0.3 : LE POIDS DE L'INSTANT (Version Diamant)

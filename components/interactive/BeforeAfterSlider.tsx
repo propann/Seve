@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 
 interface BeforeAfterSliderProps {
@@ -31,7 +32,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ before, af
     >
       {/* AFTER IMAGE (Bottom) */}
       <div className="absolute inset-0 bg-zinc-900">
-        <img src={after} alt="After" className="w-full h-full object-cover" />
+        <Image src={after} alt="After" fill sizes="100vw" className="object-cover" />
         <div className="absolute bottom-4 right-4 bg-purple-500/80 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 z-20">
             <span className="text-[8px] font-black text-white tracking-widest uppercase italic">Révélé</span>
         </div>
@@ -42,8 +43,8 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ before, af
         className="absolute inset-0 z-10 overflow-hidden border-r-2 border-white/50"
         style={{ width: `${sliderPos}%` }}
       >
-        <div className="w-[100vw] h-full"> {/* Force width to container width to avoid scaling */}
-           <img src={before} alt="Before" className="w-full h-full object-cover grayscale opacity-60" style={{ width: containerRef.current?.offsetWidth }} />
+        <div className="absolute inset-0">
+          <Image src={before} alt="Before" fill sizes="100vw" className="object-cover grayscale opacity-60" />
         </div>
         <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 z-20">
             <span className="text-[8px] font-black text-white/40 tracking-widest uppercase italic">Brut (RAW)</span>

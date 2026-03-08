@@ -1,6 +1,6 @@
 # AI Collaboration Context - SEVE/Azoth
 
-Derniere mise a jour: 2026-03-01
+Derniere mise a jour: 2026-03-08
 
 But: permettre a toute IA qui rejoint le projet de comprendre rapidement ou on en est, ce qui est en production, et les prochaines actions prioritaires.
 
@@ -36,6 +36,17 @@ But: permettre a toute IA qui rejoint le projet de comprendre rapidement ou on e
 - n8n templates ajoutes:
   - `SEVE - SYSTEM - Progress State Guard`
   - `SEVE - PEDAGO - Aid Recommender`
+  - `SEVE - PEDAGO - Exercise Review`
+
+## 2.1) Verification pedagogique recente
+
+- Le workflow exercice `0.1` (stenope) est coherent bout en bout:
+  - enonce: 2 preuves attendues
+  - UI: `UploadExercise` appele avec `maxFiles={2}`
+  - API: envoi `assetUrls`, `assets`, `expectedAssetCount`
+  - prompts: `minAssets: 2`
+  - n8n: precheck `missingEvidence` avant appel Vision
+- Le test distant du webhook pedago reste a rejouer sur l instance `pedago.azoth.cloud`.
 
 ## 3) Dette technique critique connue
 
@@ -77,11 +88,12 @@ Action a faire ensuite:
 
 ## 6) Prochaine session (ordre recommande)
 
-1. Reconciler Prisma migrations pour Postgres.
-2. Connecter n8n aid recommender a la source DB/API reelle.
-3. Integrer les suggestions d entraide dans l UI chat.
-4. Demarrer l implementation de l editeur de cours avec sortie template v1.
-5. Renforcer tests auth/navigation + CI.
+1. Rejouer le test webhook pedago et la correction reelle du module `0.1`.
+2. Reconciler Prisma migrations pour Postgres.
+3. Connecter n8n aid recommender a la source DB/API reelle.
+4. Integrer les suggestions d entraide dans l UI chat.
+5. Demarrer l implementation de l editeur de cours avec sortie template v1.
+6. Renforcer tests auth/navigation + CI.
 
 ## 7) Commits recents utiles (historique rapide)
 

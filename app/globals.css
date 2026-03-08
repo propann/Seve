@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0b0b0b;
-  --color-seve: #2ecc71;
-  --color-bark: #1a1a1a;
-  --color-textMain: #e0e0e0;
-  --color-amberGlow: #f59e0b;
+  --color-background: #050908;
+  --color-seve: #d2ffb5;
+  --color-bark: #101614;
+  --color-textMain: #edf4ee;
+  --color-amberGlow: #f6b66b;
 
-  --font-sans: "Inter", "system-ui", "-apple-system", "sans-serif";
+  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 
   --animate-glow: glow 2s ease-in-out infinite alternate;
 
@@ -22,9 +22,12 @@
 }
 
 :root {
-  --background: #0b0b0b;
-  --foreground: #e0e0e0;
-  --seve: #2ecc71;
+  --background: #050908;
+  --foreground: #edf4ee;
+  --seve: #d2ffb5;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-serif: "Baskerville", "Times New Roman", serif;
+  --grid-line: rgba(255, 255, 255, 0.06);
 }
 
 /* --- OPTIMISATION LISIBILITÉ --- */
@@ -45,6 +48,22 @@ body {
   overflow-x: hidden;
   line-height: 1.6; /* Meilleur espacement entre les lignes */
   -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(to right, transparent 0, transparent calc(100% - 1px), var(--grid-line) calc(100% - 1px)),
+    linear-gradient(to bottom, transparent 0, transparent calc(100% - 1px), var(--grid-line) calc(100% - 1px));
+  background-size: 80px 80px;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top, rgba(210, 255, 181, 0.06), transparent 28%),
+    radial-gradient(circle at 20% 80%, rgba(135, 183, 255, 0.06), transparent 24%),
+    radial-gradient(circle at 80% 30%, rgba(246, 182, 107, 0.07), transparent 26%);
+  z-index: -1;
 }
 
 /* Custom CSS for the Cyber-Organic vibe */

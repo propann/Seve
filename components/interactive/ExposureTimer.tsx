@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useEffectEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Timer, Zap, Image as ImageIcon, RotateCcw } from "lucide-react";
 
@@ -9,6 +9,13 @@ export const ExposureTimer: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<"under" | "perfect" | "over" | null>(null);
+
+  const evaluateResult = useEffectEvent(() => {
+    // Simulation d'un temps idéal à 12.5s pour l'exercice
+    if (exposureTime < 10) setResult("under");
+    else if (exposureTime > 15) setResult("over");
+    else setResult("perfect");
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -27,13 +34,6 @@ export const ExposureTimer: React.FC = () => {
     }
     return () => clearInterval(interval);
   }, [isRunning, progress, exposureTime]);
-
-  const evaluateResult = () => {
-    // Simulation d'un temps idéal à 12.5s pour l'exercice
-    if (exposureTime < 10) setResult("under");
-    else if (exposureTime > 15) setResult("over");
-    else setResult("perfect");
-  };
 
   const startExposure = () => {
     setProgress(0);

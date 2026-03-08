@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import NextImage from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Check, Loader2, ShieldAlert } from "lucide-react";
@@ -22,7 +22,7 @@ async function optimizeExerciseImage(file: File): Promise<string> {
   });
 
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const node = new Image();
+    const node = new window.Image();
     node.onerror = () => reject(new Error("Format image invalide."));
     node.onload = () => resolve(node);
     node.src = dataUrl;
@@ -167,7 +167,7 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
                   <div className={`grid h-full gap-3 ${previewUrls.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
                     {previewUrls.slice(0, maxFiles).map((preview, index) => (
                       <div key={preview.name} className="relative overflow-hidden rounded-2xl bg-black/40">
-                        <Image
+                        <NextImage
                           src={preview.url}
                           alt={`Preview ${index + 1}`}
                           fill

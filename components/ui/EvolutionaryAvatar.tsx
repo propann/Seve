@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 
 interface AvatarProps {
@@ -23,6 +23,14 @@ export const EvolutionaryAvatar: React.FC<AvatarProps> = ({ level, xp }) => {
   ];
 
   const currentStage = stages[Math.min(level, 4)];
+  const [particles] = useState(() =>
+    [...Array(8)].map(() => ({
+      cx: 20 + Math.random() * 60,
+      cy: 20 + Math.random() * 40,
+      duration: 2 + Math.random() * 2,
+      delay: Math.random() * 2,
+    }))
+  );
 
   return (
     <div className="relative w-32 h-32 flex items-center justify-center">
@@ -105,11 +113,11 @@ export const EvolutionaryAvatar: React.FC<AvatarProps> = ({ level, xp }) => {
               strokeLinecap="round"
             />
             {/* Luminous Pixels (Falling) */}
-            {[...Array(8)].map((_, i) => (
+            {particles.map((particle, i) => (
               <motion.circle
                 key={i}
-                cx={20 + Math.random() * 60}
-                cy={20 + Math.random() * 40}
+                cx={particle.cx}
+                cy={particle.cy}
                 r="1.5"
                 fill={currentStage.color}
                 animate={{ 
@@ -117,9 +125,9 @@ export const EvolutionaryAvatar: React.FC<AvatarProps> = ({ level, xp }) => {
                   opacity: [0, 1, 0]
                 }}
                 transition={{ 
-                  duration: 2 + Math.random() * 2, 
+                  duration: particle.duration,
                   repeat: Infinity, 
-                  delay: Math.random() * 2 
+                  delay: particle.delay
                 }}
               />
             ))}

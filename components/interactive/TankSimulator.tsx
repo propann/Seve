@@ -6,7 +6,7 @@ import { Droplets, Thermometer, RotateCw, AlertTriangle } from "lucide-react";
 
 export const TankSimulator: React.FC = () => {
   const [agitation, setAgitation] = useState(0);
-  const [temp, setTemp] = useState(20);
+  const [temp] = useState(20);
   const [isAgitating, setIsAgitating] = useState(false);
   const controls = useAnimation();
 

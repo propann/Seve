@@ -1,6 +1,6 @@
 # Statut Projet SEVE Web
 
-Derniere mise a jour: 2026-03-01
+Derniere mise a jour: 2026-03-08
 
 ## Resume executif
 
@@ -11,12 +11,25 @@ Derniere mise a jour: 2026-03-01
 
 ## Etat actuel
 
-- `npm run build -- --webpack`: OK
-- `npm run lint`: OK avec warnings (0 erreur bloquante)
+- `npm run lint`: OK avec warnings (12 warnings, 0 erreur bloquante) au 2026-03-08
+- `npm run build`: a relancer dans un workspace propre si un ancien `next build` garde `.next/lock`
 - Deploiement Coolify: OK (rolling update)
 - HTTPS sur `azoth.cloud` et `www.azoth.cloud`: OK
 
 ## Correctifs recents majeurs
+
+- Verification workflow correction exercice 0.1 (session 2026-03-08):
+  - l enonce du module `0.1` demande bien 2 preuves: le dispositif stenope puis la trace lumineuse
+  - l UI force `maxFiles={2}` sur [m0-1/page.tsx](/home/azoth/web/app/dashboard/courses/m0-1/page.tsx)
+  - l API [route.ts](/home/azoth/web/app/api/profile/exercise/route.ts) envoie `assetUrls`, `assets` et `expectedAssetCount`
+  - la config [exercise-prompts.ts](/home/azoth/web/lib/pedago/exercise-prompts.ts) impose `minAssets: 2` pour `0.1`
+  - le workflow n8n `SEVE - PEDAGO - Exercise Review` pre-rejette la soumission si les preuves visuelles sont insuffisantes
+
+- Stabilisation session/UI et hygiene Next 16 (session 2026-03-07):
+  - correction du state client auth: purge du fallback local si `/api/auth/me` repond `401`
+  - separation stockage local utilisateur (`arbre_user`) vs cookie serveur `arbre_session`
+  - migration du garde-route Next.js de `middleware.ts` vers `proxy.ts` pour supprimer l avertissement deprecation
+  - suppression des renders instables sur composants interactifs (`refs` pendant render, `Math.random()` pendant render, calcul exposition derive)
 
 - Ajustements UX pages cours et jardin (session 2026-03-01):
   - page presentation photographie epuree: masquage header global + sidebar gauche uniquement sur `/dashboard/courses/photographie`
@@ -68,6 +81,7 @@ Derniere mise a jour: 2026-03-01
 ## Risques connus
 
 - Warnings lint encore nombreux (notamment `no-unused-vars`, `no-img-element`, `any`).
+- Validation distante encore a refaire sur `pedago.azoth.cloud` avec le script [test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh) une fois les acces reseau/credentials disponibles.
 - La correction seccomp est appliquee dans les compose locaux (`/data/coolify/...`) et doit etre preservee en cas de regeneration des stacks.
 - Dette migration Prisma:
   - historique migrations legacy non aligne (`migration_lock.toml` en `sqlite` vs DB `postgresql`)
@@ -76,7 +90,7 @@ Derniere mise a jour: 2026-03-01
 ## Prochaines priorites recommandees
 
 1. Remplacer le routage Nginx par un routage full Coolify (plus robuste aux redeploiements).
-2. Reduire progressivement les warnings lint critiques (types `any`, refs en render).
+2. Reduire progressivement les warnings lint critiques restants (`any`, `no-unused-vars`, `no-img-element`).
 3. Ajouter tests automatiques minimum sur auth/session/routes API.
 4. Mettre en place CI (lint + build + tests) avant merge sur `main`.
 5. Piloter la cloture projet via le backlog unique: [PROJECT_FINAL_TASKS.md](/home/azoth/web/docs/PROJECT_FINAL_TASKS.md).

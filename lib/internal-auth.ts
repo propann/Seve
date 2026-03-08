@@ -16,8 +16,8 @@ export interface User {
   level: number;
   completedNodes: string[] | string;
   unlockedNodes: string[] | string;
-  inventory?: any;
-  software?: any;
+  inventory?: Record<string, number>;
+  software?: string[];
   alignment?: number;
   profileData?: LearningProfileData;
 }

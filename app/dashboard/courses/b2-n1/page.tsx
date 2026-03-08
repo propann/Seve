@@ -5,7 +5,7 @@ import { LectureLayout, Hook, Immersion } from "@/components/layout/LectureLayou
 import { KnowledgeNode } from "@/components/ui/KnowledgeNode";
 import { SunPathSimulator } from "@/components/interactive/SunPathSimulator";
 import { UploadExercise } from "@/components/ui/UploadExercise";
-import { Mountain, Zap, Sun } from "lucide-react";
+import { Mountain, Sun } from "lucide-react";
 
 /**
  * MODULE B2.N.1 : LA LUMIÈRE SAUVAGE
