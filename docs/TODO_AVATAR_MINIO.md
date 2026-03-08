@@ -9,7 +9,8 @@ Basculer la photo de profil (`/rituel`) vers un stockage MinIO/S3 fiable, puis a
 - Fait: la fiche personnage upload maintenant l’image via API serveur (`POST /api/profile/avatar`) puis sauvegarde l’URL retournée en base.
 - Fait: l’avatar s’affiche dans la fiche personnage et dans le header avec fallback si URL invalide.
 - Fait: `AGENTS.md` mis à jour avec l’état réel du workspace.
-- Bloquant restant: `S3_SECRET_KEY` n’est pas renseigné dans `web/.env`.
+- Note 2026-03-08: le blocage historique sur `S3_SECRET_KEY` dans `web/.env` n est plus d actualite locale.
+- Cause observee ensuite: en dev, `web/.env.local` prenait la priorite sur `web/.env` sans reprendre la config S3.
 
 ## Fichiers déjà modifiés
 - `/home/azoth/AGENTS.md`
@@ -32,19 +33,20 @@ Basculer la photo de profil (`/rituel`) vers un stockage MinIO/S3 fiable, puis a
    - `S3_SECRET_KEY=...`
    - `S3_FORCE_PATH_STYLE=true`
    - `NEXT_PUBLIC_S3_PUBLIC_BASE_URL=https://s3.azoth.cloud/seve`
-3. Redémarrer l’application web pour recharger l’environnement.
-4. Tester en UI:
+3. Si vous lancez Next.js en local, recopier aussi ces valeurs dans `/home/azoth/web/.env.local` si ce fichier est utilise.
+4. Redémarrer l’application web pour recharger l’environnement.
+5. Tester en UI:
    - Se connecter
    - Aller sur `/rituel`
    - Uploader une image avatar
    - Cliquer sauvegarde profil
-5. Vérifier le rendu:
+6. Vérifier le rendu:
    - Avatar visible sur `/rituel`
    - Avatar visible dans le header
-6. Vérifier persistance:
+7. Vérifier persistance:
    - Se déconnecter/reconnecter
    - Vérifier que l’avatar reste affiché
-7. Vérifier stockage MinIO:
+8. Vérifier stockage MinIO:
    - Confirmer qu’un objet est créé sous un chemin du type `avatars/<userId>/...`
 
 ## Critères d’acceptation
@@ -55,6 +57,7 @@ Basculer la photo de profil (`/rituel`) vers un stockage MinIO/S3 fiable, puis a
 
 ## Dépannage rapide
 - Erreur `S3 config incomplete`: variable(s) manquante(s) dans `web/.env`.
+- En dev, verifier d abord `web/.env.local` avant d insulter MinIO.
 - Erreur upload 401: session `arbre_session` absente/invalide.
 - Avatar non affiché: URL inaccessible publiquement ou bucket/ACL/policy incorrecte.
 - Avatar cassé après migration: vérifier `NEXT_PUBLIC_S3_PUBLIC_BASE_URL`.

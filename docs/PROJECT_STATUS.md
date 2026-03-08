@@ -22,6 +22,14 @@ Derniere mise a jour: 2026-03-08
 
 ## Correctifs recents majeurs
 
+- Correctif config avatar/exercice S3 (session 2026-03-08):
+  - diagnostic de l erreur `S3 config incomplete` confirme
+  - cause reelle en dev: `/.env.local` prioritaire sur `/.env`, sans variables S3 recopiees
+  - config S3 remise en coherence dans l environnement local de dev
+  - message d erreur serveur rendu plus precis: liste des variables manquantes + rappel de redemarrer Next.js
+  - documentation projet mise a jour pour expliciter la priorite de `/.env.local`
+  - morale technique: le bug n etait pas mystique, juste cache dans l ordre de chargement
+
 - Verification workflow correction exercice 0.1 (session 2026-03-08):
   - l enonce du module `0.1` demande bien 2 preuves: le dispositif stenope puis la trace lumineuse
   - l UI force `maxFiles={2}` sur [m0-1/page.tsx](/home/azoth/web/app/dashboard/courses/m0-1/page.tsx)

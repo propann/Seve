@@ -58,6 +58,20 @@ But: permettre a toute IA qui rejoint le projet de comprendre rapidement ou on e
   - message: webhook non enregistre
 - Conclusion: la web app est prete, mais le workflow `SEVE - PEDAGO - Exercise Review` doit etre importe/active cote `pedago.azoth.cloud`.
 
+## 2.2) Verification stockage avatar/S3 recente
+
+- L upload avatar et l upload exercice partagent `lib/s3-upload.ts`.
+- L erreur `S3 config incomplete` ne venait pas du code de signature, mais d un chargement d environnement incomplet en developpement.
+- Cause identifiee le 2026-03-08:
+  - `/.env.local` etait charge avant `/.env`
+  - les variables `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` etaient presentes dans `/.env` mais absentes de `/.env.local`
+- Correction appliquee:
+  - environnement local remis en coherence
+  - message serveur rendu plus utile en listant les variables manquantes
+- Regle a retenir:
+  - toute modif des variables S3 doit etre reportee dans le fichier d env effectivement utilise par l execution courante
+  - redemarrer Next.js apres changement, sinon le serveur continue calmement avec de mauvaises idees
+
 ## 3) Dette technique critique connue
 
 ### 3.1 Prisma migrations

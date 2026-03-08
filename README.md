@@ -62,10 +62,19 @@ npm run start -- --hostname 127.0.0.1 --port 3000
 
 - `DATABASE_URL` (PostgreSQL)
 - `AUTH_SESSION_SECRET` (signature des cookies de session, min 32 caractères)
+- `S3_ENDPOINT` (endpoint MinIO/S3)
+- `S3_BUCKET` (bucket avatars/exercices)
+- `S3_ACCESS_KEY` (clé d'accès stockage)
+- `S3_SECRET_KEY` (secret stockage)
+- `NEXT_PUBLIC_S3_PUBLIC_BASE_URL` (base URL publique des objets)
 - `RESEND_API_KEY` (emails transactionnels)
 - `CLERK_WEBHOOK_SECRET` (webhook Clerk, si activé)
 - `N8N_PEDAGO_EXERCISE_WEBHOOK_URL` (correction exercice)
 - `N8N_PEDAGO_WEBHOOK_SECRET` (secret webhook correction exercice)
+
+Notes utiles:
+- En développement Next.js, `/.env.local` est prioritaire sur `/.env`.
+- Après modification d'une variable d'environnement, redémarrer `npm run dev`. Next ne lit pas dans les pensées, seulement dans `process.env`.
 
 ## API Auth
 

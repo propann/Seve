@@ -38,8 +38,15 @@ function getS3Config(): S3Config {
   const forcePathStyle = String(process.env.S3_FORCE_PATH_STYLE || "true").toLowerCase() !== "false";
   const publicBaseUrl = String(process.env.S3_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_S3_PUBLIC_BASE_URL || "").trim() || undefined;
 
-  if (!endpoint || !bucket || !accessKey || !secretKey) {
-    throw new Error("S3 config incomplete. Required: S3_ENDPOINT, S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY.");
+  const missing = [
+    !endpoint ? "S3_ENDPOINT" : null,
+    !bucket ? "S3_BUCKET" : null,
+    !accessKey ? "S3_ACCESS_KEY" : null,
+    !secretKey ? "S3_SECRET_KEY" : null,
+  ].filter(Boolean);
+
+  if (missing.length > 0) {
+    throw new Error(`S3 config incomplete. Missing: ${missing.join(", ")}. Restart the Next.js server after updating env files.`);
   }
 
   return { endpoint, bucket, accessKey, secretKey, region, forcePathStyle, publicBaseUrl };
