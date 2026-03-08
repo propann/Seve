@@ -3,6 +3,14 @@ export type ExperienceLevel = "debutant" | "intermediaire" | "avance";
 export type SeedKey = "photographie" | "cinema" | "design" | "linux";
 export type SeedEquipmentMap = Partial<Record<SeedKey, Record<string, number>>>;
 
+export interface ExerciseAsset {
+  id: string;
+  url: string;
+  storageKey: string;
+  mimeType: string;
+  size: number;
+}
+
 export interface ExerciseSubmission {
   id: string;
   moduleId: string;
@@ -10,6 +18,7 @@ export interface ExerciseSubmission {
   storageKey: string;
   mimeType: string;
   size: number;
+  assets?: ExerciseAsset[];
   submittedAt: string;
 }
 
@@ -80,6 +89,19 @@ export function isLearningProfileData(value: unknown): value is LearningProfileD
           typeof row.storageKey === "string" &&
           typeof row.mimeType === "string" &&
           typeof row.size === "number" &&
+          (row.assets === undefined ||
+            (Array.isArray(row.assets) &&
+              row.assets.every((asset) => {
+                if (!asset || typeof asset !== "object" || Array.isArray(asset)) return false;
+                const entry = asset as Record<string, unknown>;
+                return (
+                  typeof entry.id === "string" &&
+                  typeof entry.url === "string" &&
+                  typeof entry.storageKey === "string" &&
+                  typeof entry.mimeType === "string" &&
+                  typeof entry.size === "number"
+                );
+              }))) &&
           typeof row.submittedAt === "string"
         );
       }));

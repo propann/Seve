@@ -433,14 +433,21 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ onComplete }) => {
               {exerciseSubmissions.slice(0, 6).map((submission) => (
                 <a
                   key={submission.id}
-                  href={submission.imageUrl}
+                  href={submission.assets?.[0]?.url || submission.imageUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="block overflow-hidden rounded-2xl border border-white/10 bg-black/40 hover:border-seve/40 transition-colors"
                 >
-                  <img src={submission.imageUrl} alt={`Epreuve ${submission.moduleId}`} className="w-full h-36 object-cover" />
+                  <img
+                    src={submission.assets?.[0]?.url || submission.imageUrl}
+                    alt={`Epreuve ${submission.moduleId}`}
+                    className="w-full h-36 object-cover"
+                  />
                   <div className="p-3">
                     <p className="text-[10px] font-black uppercase tracking-widest text-seve">Module {submission.moduleId}</p>
+                    <p className="text-[10px] text-white/45 mt-1">
+                      {(submission.assets?.length || 1).toString()} image{(submission.assets?.length || 1) > 1 ? "s" : ""}
+                    </p>
                     <p className="text-[10px] text-white/50 mt-1">
                       {new Date(submission.submittedAt).toLocaleString("fr-FR")}
                     </p>

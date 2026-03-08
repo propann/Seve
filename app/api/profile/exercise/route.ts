@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 import { verifySessionToken } from "@/lib/session-token";
 import { parseJsonWithFallback } from "@/lib/safe-json";
 import { createExerciseObjectKey, uploadBufferToS3 } from "@/lib/s3-upload";
-import { ExerciseReview, ExerciseSubmission, isLearningProfileData } from "@/lib/types/profile";
+import { ExerciseAsset, ExerciseReview, ExerciseSubmission, isLearningProfileData } from "@/lib/types/profile";
 import { cursus } from "@/lib/data/cursus";
 import { getExercisePromptConfig } from "@/lib/pedago/exercise-prompts";
 
@@ -16,6 +16,7 @@ const MIME_TO_EXT: Record<string, string> = {
 };
 
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+const MAX_IMAGES_PER_SUBMISSION = 4;
 const MAX_STORED_SUBMISSIONS = 40;
 const MAX_STORED_REVIEWS = 80;
 const MODULE_XP_REWARD = 25;
@@ -41,6 +42,17 @@ function toNodeList(raw: string | null | undefined, fallback: string[]): string[
 
 function normalizeId(id: string): string {
   return id.trim().toLowerCase();
+}
+
+function collectIncomingDataUrls(body: unknown): string[] {
+  if (!body || typeof body !== "object") return [];
+  const payload = body as Record<string, unknown>;
+  const fromArray = Array.isArray(payload.dataUrls)
+    ? payload.dataUrls.filter((entry): entry is string => typeof entry === "string").map((entry) => entry.trim()).filter(Boolean)
+    : [];
+  const fromSingle = typeof payload.dataUrl === "string" && payload.dataUrl.trim() ? [payload.dataUrl.trim()] : [];
+
+  return [...fromArray, ...fromSingle].slice(0, MAX_IMAGES_PER_SUBMISSION);
 }
 
 function resolveReview(payload: unknown): {
@@ -155,33 +167,48 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const moduleId = String(body?.moduleId || "").trim();
-    const dataUrl = String(body?.dataUrl || "").trim();
+    const dataUrls = collectIncomingDataUrls(body);
 
     if (!moduleId) {
       return NextResponse.json({ success: false, error: "Module manquant." }, { status: 400 });
     }
-    if (!dataUrl) {
-      return NextResponse.json({ success: false, error: "Image requise." }, { status: 400 });
+    if (dataUrls.length === 0) {
+      return NextResponse.json({ success: false, error: "Au moins une image est requise." }, { status: 400 });
     }
 
-    const parsed = parseDataUrl(dataUrl);
-    if (!parsed) {
+    const parsedImages = dataUrls.map((dataUrl) => parseDataUrl(dataUrl));
+    if (parsedImages.some((entry) => !entry)) {
       return NextResponse.json(
         { success: false, error: "Format image non supporte. Utilisez JPG, PNG ou WEBP." },
         { status: 400 }
       );
     }
 
-    if (parsed.bytes.byteLength > MAX_IMAGE_BYTES) {
+    const normalizedImages = parsedImages as { mime: string; bytes: Buffer }[];
+    if (normalizedImages.some((entry) => entry.bytes.byteLength > MAX_IMAGE_BYTES)) {
       return NextResponse.json(
-        { success: false, error: "Image trop lourde apres optimisation (max 6MB)." },
+        { success: false, error: "Image trop lourde apres optimisation (max 6MB par image)." },
         { status: 413 }
       );
     }
 
-    const extension = MIME_TO_EXT[parsed.mime] || "jpg";
-    const key = createExerciseObjectKey(session.uid, moduleId, extension);
-    const uploaded = await uploadBufferToS3(key, parsed.mime, parsed.bytes);
+    const uploadedAssets = await Promise.all(
+      normalizedImages.map(async (image) => {
+        const extension = MIME_TO_EXT[image.mime] || "jpg";
+        const key = createExerciseObjectKey(session.uid, moduleId, extension);
+        const uploaded = await uploadBufferToS3(key, image.mime, image.bytes);
+
+        const asset: ExerciseAsset = {
+          id: randomUUID(),
+          url: uploaded.url,
+          storageKey: uploaded.key,
+          mimeType: image.mime,
+          size: image.bytes.byteLength,
+        };
+
+        return asset;
+      })
+    );
 
     const userRecord = await prisma.user.findUnique({
       where: { id: session.uid },
@@ -207,13 +234,18 @@ export async function POST(request: Request) {
       : [];
     const currentReviews = Array.isArray(currentProfile.exerciseReviews) ? currentProfile.exerciseReviews : [];
 
+    const primaryAsset = uploadedAssets[0];
+    if (!primaryAsset) {
+      return NextResponse.json({ success: false, error: "Aucun asset exercice n'a pu etre stocke." }, { status: 500 });
+    }
     const submission: ExerciseSubmission = {
       id: randomUUID(),
       moduleId,
-      imageUrl: uploaded.url,
-      storageKey: uploaded.key,
-      mimeType: parsed.mime,
-      size: parsed.bytes.byteLength,
+      imageUrl: primaryAsset.url,
+      storageKey: primaryAsset.storageKey,
+      mimeType: primaryAsset.mimeType,
+      size: uploadedAssets.reduce((total, asset) => total + asset.size, 0),
+      assets: uploadedAssets,
       submittedAt: new Date().toISOString(),
     };
     const promptConfig = getExercisePromptConfig(moduleId);
@@ -229,13 +261,17 @@ export async function POST(request: Request) {
       moduleId,
       assetUrl: submission.imageUrl,
       assetKey: submission.storageKey,
+      assetUrls: uploadedAssets.map((asset) => asset.url),
+      assets: uploadedAssets,
       mimeType: submission.mimeType,
       size: submission.size,
+      assetCount: uploadedAssets.length,
       submittedAt: submission.submittedAt,
       evaluationPrompt: promptConfig.prompt,
       evaluationObjective: promptConfig.objective,
       evaluationChecklist: promptConfig.checklist,
       rejectionHints: promptConfig.rejectionHints,
+      expectedAssetCount: promptConfig.minAssets,
       xp: userRecord.xp,
       level: userRecord.level,
       completedNodes: completedList,

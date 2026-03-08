@@ -38,3 +38,13 @@ Exemples:
 - `pedago/seve-pedago-aid-recommender.workflow.json`
   - recommande des pairs d aide selon materiel + progression
   - bascule en `coach_fallback` si aucun pair compatible
+- `pedago/seve-pedago-exercise-review.workflow.json`
+  - retourne une revue d exercice compatible avec l API web
+  - appelle Groq Vision via l API `Responses`
+  - modele par defaut: `meta-llama/llama-4-scout-17b-16e-instruct`
+
+## Variables d environnement conseillees (instance pedago)
+
+- `GROQ_API_KEY`: cle API Groq
+- `GROQ_VISION_MODEL`: optionnel, par defaut `meta-llama/llama-4-scout-17b-16e-instruct`
+- `GROQ_TIMEOUT_MS`: optionnel, par defaut `45000`

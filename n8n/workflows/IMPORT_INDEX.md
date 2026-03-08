@@ -25,10 +25,14 @@ Ce fichier est la reference unique pour savoir quoi importer, ou, et dans quel o
    - Instance cible: `pedago.azoth.cloud`
    - Nom attendu: `SEVE - PEDAGO - Aid Recommender`
    - Webhook path: `seve/pedago/aid-recommendation`
+5. [pedago/seve-pedago-exercise-review.workflow.json](/home/azoth/web/n8n/workflows/pedago/seve-pedago-exercise-review.workflow.json)
+   - Instance cible: `pedago.azoth.cloud`
+   - Nom attendu: `SEVE - PEDAGO - Exercise Review`
+   - Webhook path: `seve/pedago/exercise-review`
 
 ## Ordre conseille
 
-1. Importer les 4 workflows (laisser `Active = OFF`).
+1. Importer les 5 workflows (laisser `Active = OFF`).
 2. Verifier les paths webhook (pas de collision).
 3. Executer les tests payload via le script [scripts/test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh).
 4. Activer les workflows uniquement apres validation.

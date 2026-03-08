@@ -1,14 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Check, Loader2, Camera, ShieldAlert } from "lucide-react";
+import { Upload, Check, Loader2, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/lib/auth/AuthContext";
 import { ExerciseReview, ExerciseSubmission } from "@/lib/types/profile";
 
 interface UploadExerciseProps {
   moduleId: string;
   instruction?: string;
+  maxFiles?: number;
 }
 
 async function optimizeExerciseImage(file: File): Promise<string> {
@@ -47,31 +49,31 @@ async function optimizeExerciseImage(file: File): Promise<string> {
  * UPLOAD EXERCISE : La Porte vers l'Analyse IA
  * Upload réel de l'image + sauvegarde dans la fiche élève.
  */
-export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instruction }) => {
+export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instruction, maxFiles = 1 }) => {
   const { user, updateUser } = useAuth();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<"idle" | "uploading" | "analyzing" | "success" | "error">("idle");
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const previewUrl = useMemo(() => {
-    if (!file) return null;
-    return URL.createObjectURL(file);
-  }, [file]);
+  const previewUrls = useMemo(
+    () => files.map((file) => ({ name: file.name, url: URL.createObjectURL(file) })),
+    [files]
+  );
 
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrls.forEach((entry) => URL.revokeObjectURL(entry.url));
     };
-  }, [previewUrl]);
+  }, [previewUrls]);
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (files.length === 0) return;
 
     try {
       setStatus("uploading");
       setFeedback(null);
 
-      const dataUrl = await optimizeExerciseImage(file);
+      const dataUrls = await Promise.all(files.map((file) => optimizeExerciseImage(file)));
       setStatus("analyzing");
 
       const response = await fetch("/api/profile/exercise", {
@@ -80,7 +82,7 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
         credentials: "include",
         body: JSON.stringify({
           moduleId,
-          dataUrl,
+          dataUrls,
         }),
       });
 
@@ -125,7 +127,7 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
       const coachReply = payload.review?.coachReply || "Epreuve enregistree. Correction IA en cours.";
       const firstRecommendation = payload.review?.recommendations?.[0];
       setFeedback(firstRecommendation ? `${coachReply} Conseil: ${firstRecommendation}` : coachReply);
-      setFile(null);
+      setFiles([]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Upload image impossible.";
       setStatus("error");
@@ -141,7 +143,7 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
         <div className="w-full md:w-1/2">
           <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-white/10 rounded-3xl cursor-pointer hover:border-seve/50 hover:bg-seve/5 transition-all relative overflow-hidden group">
             <AnimatePresence mode="wait">
-              {!file ? (
+              {previewUrls.length === 0 ? (
                 <motion.div
                   key="placeholder"
                   initial={{ opacity: 0 }}
@@ -151,6 +153,9 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
                 >
                   <Upload className="w-12 h-12 text-white/20 mb-4 group-hover:text-seve transition-colors" />
                   <p className="text-xs font-black tracking-widest text-white/40 uppercase">DEPOSER VOTRE TRACE</p>
+                  <p className="mt-2 text-[10px] text-white/35 uppercase tracking-[0.3em]">
+                    {maxFiles > 1 ? `${maxFiles} IMAGES MAX` : "1 IMAGE"}
+                  </p>
                 </motion.div>
               ) : (
                 <motion.div
@@ -159,11 +164,24 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
                   animate={{ opacity: 1, scale: 1 }}
                   className="absolute inset-0 p-4"
                 >
-                  <div className="w-full h-full bg-black/40 rounded-2xl flex items-center justify-center overflow-hidden">
-                    {previewUrl ? <img src={previewUrl} alt="Preview" className="w-full h-full object-cover opacity-50" /> : null}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Camera className="w-12 h-12 text-seve" />
-                    </div>
+                  <div className={`grid h-full gap-3 ${previewUrls.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+                    {previewUrls.slice(0, maxFiles).map((preview, index) => (
+                      <div key={preview.name} className="relative overflow-hidden rounded-2xl bg-black/40">
+                        <Image
+                          src={preview.url}
+                          alt={`Preview ${index + 1}`}
+                          fill
+                          unoptimized
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-cover opacity-60"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="rounded-full bg-black/45 px-3 py-2 text-[10px] font-black uppercase tracking-[0.3em] text-seve">
+                            {index + 1}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </motion.div>
               )}
@@ -172,10 +190,12 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
               type="file"
               className="hidden"
               onChange={(e) => {
-                setFile(e.target.files?.[0] || null);
+                const nextFiles = Array.from(e.target.files || []).slice(0, maxFiles);
+                setFiles(nextFiles);
                 setStatus("idle");
                 setFeedback(null);
               }}
+              multiple={maxFiles > 1}
               accept="image/*"
             />
           </label>
@@ -185,11 +205,16 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
           <div className="space-y-2">
             <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">Soumettre le Defi</h3>
             {instruction && <p className="text-xs text-white/50 leading-relaxed">{instruction}</p>}
+            {maxFiles > 1 ? (
+              <p className="text-xs text-white/45 leading-relaxed">
+                Cette epreuve attend plusieurs preuves visuelles. Selectionnez jusqu&apos;a {maxFiles} images avant l&apos;envoi.
+              </p>
+            ) : null}
             <p className="text-xs text-white/40 font-bold tracking-widest uppercase">Module {moduleId} | Analyse Vision IA</p>
           </div>
 
           <button
-            disabled={!file || status === "uploading" || status === "analyzing"}
+            disabled={files.length === 0 || status === "uploading" || status === "analyzing"}
             onClick={handleUpload}
             className="w-full py-5 bg-seve text-background font-black rounded-2xl disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-[0.4em] text-xs flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(46,204,113,0.3)]"
           >

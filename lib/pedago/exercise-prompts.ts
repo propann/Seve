@@ -3,6 +3,7 @@ export interface ExercisePromptConfig {
   objective: string;
   checklist: string[];
   rejectionHints: string[];
+  minAssets: number;
   prompt: string;
 }
 
@@ -18,6 +19,7 @@ const DEFAULT_CONFIG: ExercisePromptConfig = {
     "Indiquer 2 corrections concretes et actionnables.",
     "Suggérer un reshoot precis plutot qu'un conseil vague.",
   ],
+  minAssets: 1,
   prompt:
     "Tu es correcteur photo. Evalue strictement l'image selon l'objectif et la checklist. Retourne un JSON court.",
 };
@@ -35,8 +37,9 @@ const EXERCISE_PROMPTS: Record<string, ExercisePromptConfig> = {
       "Demander de renforcer la projection lumineuse (contraste + obscurite).",
       "Demander un cadre plus lisible du dispositif stenope.",
     ],
+    minAssets: 2,
     prompt:
-      "Corrige l'exercice 0.1 (stenope). Valide seulement si la trace optique est visible et pedagogiquement demonstrable.",
+      "Corrige l'exercice 0.1 (stenope). Deux images sont attendues: le dispositif physique puis la trace lumineuse. Valide seulement si les deux preuves sont presentes et pedagogiquement demonstrables.",
   },
   "1.1": {
     moduleId: "1.1",
@@ -50,6 +53,7 @@ const EXERCISE_PROMPTS: Record<string, ExercisePromptConfig> = {
       "Proposer un reglages cibles (ISO/vitesse/ouverture).",
       "Demander une seconde prise dans une scene controlee.",
     ],
+    minAssets: 1,
     prompt:
       "Corrige l'exercice 1.1 (triangle d'exposition). Verifie l'intention technique et la coherence du rendu.",
   },
@@ -65,6 +69,7 @@ const EXERCISE_PROMPTS: Record<string, ExercisePromptConfig> = {
       "Indiquer ce qui parasite la lecture du sujet.",
       "Donner une consigne de recadrage concrete.",
     ],
+    minAssets: 1,
     prompt:
       "Corrige l'exercice 1.2 (composition). Sois exigeant sur la lisibilite et la structure visuelle.",
   },
@@ -80,6 +85,7 @@ const EXERCISE_PROMPTS: Record<string, ExercisePromptConfig> = {
       "Signaler dominante couleur problematique.",
       "Proposer ajustement concret de temperature/teinte.",
     ],
+    minAssets: 1,
     prompt:
       "Corrige l'exercice 1.3 (couleur). Verifie harmonie chromatique et intention emotionnelle.",
   },

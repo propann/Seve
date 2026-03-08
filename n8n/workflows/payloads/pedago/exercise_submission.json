@@ -2,8 +2,23 @@
   "type": "exercise_submission",
   "messageId": "msg-pedago-002",
   "userName": "learner_one",
-  "courseId": "m1-2",
-  "exerciseId": "expo-01",
-  "assetUrl": "https://s3.azoth.cloud/seve/exercises/expo-01.jpg",
-  "notes": "Test exposition avec contre-jour"
+  "selectedSeed": "photographie",
+  "moduleId": "0.1",
+  "assetUrl": "https://s3.azoth.cloud/seve/exercises/0-1-proof-1.jpg",
+  "assetUrls": [
+    "https://s3.azoth.cloud/seve/exercises/0-1-proof-1.jpg",
+    "https://s3.azoth.cloud/seve/exercises/0-1-proof-2.jpg"
+  ],
+  "assetCount": 2,
+  "expectedAssetCount": 2,
+  "evaluationObjective": "Verifier la comprehension camera obscura et trace lumineuse.",
+  "evaluationChecklist": [
+    "Presence d'une projection lumineuse ou d'un resultat de stenope.",
+    "Inversion/trace optique perceptible ou clairement documentee.",
+    "Image exploitable: sujet visible, exposition suffisante."
+  ],
+  "rejectionHints": [
+    "Demander de renforcer la projection lumineuse.",
+    "Demander un cadre plus lisible du dispositif."
+  ]
 }

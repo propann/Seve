@@ -14,7 +14,11 @@
 1. Verifier `Webhook path` (eviter collisions entre envs).
 2. Ajouter un secret de verification webhook (header ou query).
 3. Configurer credentials externes (si utilises).
-4. Mettre `Active = OFF` tant que les tests ne sont pas valides.
+4. Pour `SEVE - PEDAGO - Exercise Review`, definir au minimum:
+   - `GROQ_API_KEY`
+   - `GROQ_VISION_MODEL` (optionnel)
+   - `GROQ_TIMEOUT_MS` (optionnel)
+5. Mettre `Active = OFF` tant que les tests ne sont pas valides.
 
 ## 3) Tests payload
 
@@ -30,7 +34,8 @@ Tester au minimum:
 Valider:
 
 - reponse HTTP 200
-- `status=accepted`
+- pour les routeurs: `status=accepted`
+- pour `exercise_submission`: JSON de review (`approved`, `status`, `coachReply`, `provider`)
 - champs attendus (`eventType`, `nextAction`, `coachReply`, `guard`)
 
 Commande test recommandee:

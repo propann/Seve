@@ -7,7 +7,7 @@ import { InteractiveComparison } from "@/components/ui/InteractiveComparison";
 import { GlossaryTerm } from "@/components/ui/GlossaryTerm";
 import { UploadExercise } from "@/components/ui/UploadExercise";
 import { motion } from "framer-motion";
-import { BookOpen, Zap, AlertCircle, Eye, History } from "lucide-react";
+import { BookOpen, Zap, AlertCircle, History } from "lucide-react";
 
 /**
  * MODULE 0.1 : LA LUMIÈRE CAPTIVE (Version Diamant)
@@ -115,7 +115,7 @@ export default function Module01() {
             </div>
         </div>
 
-        <UploadExercise moduleId="0.1" />
+        <UploadExercise moduleId="0.1" maxFiles={2} />
       </section>
 
       <footer className="pt-20 text-[10px] font-mono text-white/20 uppercase tracking-widest text-center">

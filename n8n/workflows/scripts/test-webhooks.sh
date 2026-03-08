@@ -58,7 +58,7 @@ run_test \
 
 run_test \
   "PEDAGO exercise_submission" \
-  "${PEDAGO_BASE_URL}/webhook/seve/pedago/session-events" \
+  "${PEDAGO_BASE_URL}/webhook/seve/pedago/exercise-review" \
   "${ROOT_DIR}/payloads/pedago/exercise_submission.json"
 
 run_test \
