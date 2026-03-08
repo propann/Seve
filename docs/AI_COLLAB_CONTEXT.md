@@ -46,7 +46,17 @@ But: permettre a toute IA qui rejoint le projet de comprendre rapidement ou on e
   - API: envoi `assetUrls`, `assets`, `expectedAssetCount`
   - prompts: `minAssets: 2`
   - n8n: precheck `missingEvidence` avant appel Vision
-- Le test distant du webhook pedago reste a rejouer sur l instance `pedago.azoth.cloud`.
+- Le contrat de correction a ete enrichi pour transmettre aussi:
+  - `moduleTitle`
+  - `exerciseTitle`
+  - `moduleObjective`
+  - `expectedEvidence`
+  - `learnerInstruction`
+- Le test distant du webhook pedago a ete execute:
+  - URL cible: `https://pedago.azoth.cloud/webhook/seve/pedago/exercise-review`
+  - resultat: `404`
+  - message: webhook non enregistre
+- Conclusion: la web app est prete, mais le workflow `SEVE - PEDAGO - Exercise Review` doit etre importe/active cote `pedago.azoth.cloud`.
 
 ## 3) Dette technique critique connue
 

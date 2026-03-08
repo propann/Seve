@@ -83,6 +83,7 @@ export const UploadExercise: React.FC<UploadExerciseProps> = ({ moduleId, instru
         body: JSON.stringify({
           moduleId,
           dataUrls,
+          instruction,
         }),
       });
 

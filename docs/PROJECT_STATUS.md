@@ -15,6 +15,10 @@ Derniere mise a jour: 2026-03-08
 - `npm run build`: a relancer dans un workspace propre si un ancien `next build` garde `.next/lock`
 - Deploiement Coolify: OK (rolling update)
 - HTTPS sur `azoth.cloud` et `www.azoth.cloud`: OK
+- Verification connectivite 2026-03-08:
+  - Postgres: OK depuis l hote (`DATABASE_URL` joignable)
+  - S3/MinIO: OK cote reachability (`s3.azoth.cloud`)
+  - webhook pedago exercice: KO (`404 not registered`)
 
 ## Correctifs recents majeurs
 
@@ -24,6 +28,9 @@ Derniere mise a jour: 2026-03-08
   - l API [route.ts](/home/azoth/web/app/api/profile/exercise/route.ts) envoie `assetUrls`, `assets` et `expectedAssetCount`
   - la config [exercise-prompts.ts](/home/azoth/web/lib/pedago/exercise-prompts.ts) impose `minAssets: 2` pour `0.1`
   - le workflow n8n `SEVE - PEDAGO - Exercise Review` pre-rejette la soumission si les preuves visuelles sont insuffisantes
+  - le contrat de correction a ete enrichi: `moduleTitle`, `exerciseTitle`, `moduleObjective`, `expectedEvidence`, `learnerInstruction`
+  - le workflow n8n versionne a ete durci pour refuser les validations molles et utiliser les preuves attendues par module
+  - blocage actuel: l URL prod du webhook pedago retourne `404`, donc le workflow n est pas actif sur l instance distante
 
 - Stabilisation session/UI et hygiene Next 16 (session 2026-03-07):
   - correction du state client auth: purge du fallback local si `/api/auth/me` repond `401`
@@ -82,6 +89,7 @@ Derniere mise a jour: 2026-03-08
 
 - Warnings lint encore nombreux (notamment `no-unused-vars`, `no-img-element`, `any`).
 - Validation distante encore a refaire sur `pedago.azoth.cloud` avec le script [test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh) une fois les acces reseau/credentials disponibles.
+- Le workflow pedago `exercise-review` n est pas actuellement publie/actif sur `pedago.azoth.cloud` (`404 not registered`).
 - La correction seccomp est appliquee dans les compose locaux (`/data/coolify/...`) et doit etre preservee en cas de regeneration des stacks.
 - Dette migration Prisma:
   - historique migrations legacy non aligne (`migration_lock.toml` en `sqlite` vs DB `postgresql`)

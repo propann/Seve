@@ -36,3 +36,29 @@ Ce fichier est la reference unique pour savoir quoi importer, ou, et dans quel o
 2. Verifier les paths webhook (pas de collision).
 3. Executer les tests payload via le script [scripts/test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh).
 4. Activer les workflows uniquement apres validation.
+
+## Etat verifie le 2026-03-08
+
+- `DATABASE_URL`: joignable depuis l hote, donc la web app peut lire/ecrire les profils eleves.
+- `S3_ENDPOINT`: joignable, bucket `seve` configure.
+- `N8N_PEDAGO_EXERCISE_WEBHOOK_URL`: configure vers `https://pedago.azoth.cloud/webhook/seve/pedago/exercise-review`.
+- Test reel `POST` sur l URL pedago:
+  - statut recu: `404`
+  - message n8n: `The requested webhook "POST seve/pedago/exercise-review" is not registered.`
+
+Conclusion:
+- le workflow [pedago/seve-pedago-exercise-review.workflow.json](/home/azoth/web/n8n/workflows/pedago/seve-pedago-exercise-review.workflow.json) doit etre reimporte ou reactive sur `pedago.azoth.cloud`
+- tant que ce workflow n est pas actif, la correction IA d exercice ne peut pas fonctionner en production
+
+## Remise en ligne minimale du workflow pedago exercice
+
+1. Ouvrir `https://pedago.azoth.cloud`.
+2. Importer [pedago/seve-pedago-exercise-review.workflow.json](/home/azoth/web/n8n/workflows/pedago/seve-pedago-exercise-review.workflow.json) si absent.
+3. Verifier que le nom importe est bien `SEVE - PEDAGO - Exercise Review`.
+4. Verifier les variables env de l instance pedago:
+   - `GROQ_API_KEY`
+   - `GROQ_VISION_MODEL` (optionnel)
+   - `GROQ_TIMEOUT_MS` (optionnel)
+5. Verifier le `Webhook path` exact: `seve/pedago/exercise-review`.
+6. Mettre `Active = ON`.
+7. Rejouer un `POST` de test ou le script [test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh).

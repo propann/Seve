@@ -78,6 +78,29 @@ Objectif: garantir que le workflow de correction du stenope applique bien la con
    - verifier `N8N_PEDAGO_WEBHOOK_SECRET`
    - relancer le test payload: [test-webhooks.sh](/home/azoth/web/n8n/workflows/scripts/test-webhooks.sh)
 
+### Incident connu au 2026-03-08
+
+Constat reel:
+
+- l URL `https://pedago.azoth.cloud/webhook/seve/pedago/exercise-review` repond `404`
+- message retourne par n8n: `The requested webhook "POST seve/pedago/exercise-review" is not registered.`
+
+Diagnostic:
+
+- l application web est correctement configuree pour appeler le webhook
+- la base Postgres est reachable
+- le blocage est cote instance n8n pedago: workflow absent, inactif, ou path different
+
+Procedure de correction:
+
+1. Ouvrir `pedago.azoth.cloud`.
+2. Importer/reouvrir `SEVE - PEDAGO - Exercise Review`.
+3. Verifier `Webhook path = seve/pedago/exercise-review`.
+4. Verifier `GROQ_API_KEY`.
+5. Activer le workflow.
+6. Rejouer le test webhook.
+7. Refaire une soumission reelle depuis `/dashboard/courses/m0-1`.
+
 ## 4) Rollback rapide
 
 Option Coolify:

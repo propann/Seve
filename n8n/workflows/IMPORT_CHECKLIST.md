@@ -63,3 +63,23 @@ WEBHOOK_SECRET="replace-me" \
 2. Journaliser execution IDs pour traçabilite.
 3. Mettre une alerte en cas d'echec (Slack/email).
 4. Documenter URL webhook finale dans `docs/N8N_SESSIONS_ROADMAP.md`.
+
+## 5) Cas reel observe le 2026-03-08
+
+Constat:
+
+- `POST https://pedago.azoth.cloud/webhook/seve/pedago/exercise-review`
+- reponse: `404`
+- message: `The requested webhook "POST seve/pedago/exercise-review" is not registered.`
+
+Interpretation:
+
+- le workflow n est pas actif, ou pas importe sur la bonne instance, ou pas publie avec ce path exact.
+
+Verification obligatoire avant toute recette exercice:
+
+1. Workflow `SEVE - PEDAGO - Exercise Review` visible dans `pedago.azoth.cloud`.
+2. `Active = ON`.
+3. Webhook path = `seve/pedago/exercise-review`.
+4. Variables `GROQ_*` presentes.
+5. `POST` manuel ou script de test retourne `200`.

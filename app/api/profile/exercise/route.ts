@@ -44,6 +44,21 @@ function normalizeId(id: string): string {
   return id.trim().toLowerCase();
 }
 
+function findModuleMetadata(moduleId: string) {
+  for (const level of cursus) {
+    for (const courseModule of level.modules) {
+      if (normalizeId(courseModule.id) === normalizeId(moduleId)) {
+        return {
+          levelId: level.id,
+          levelName: level.name,
+          module: courseModule,
+        };
+      }
+    }
+  }
+  return null;
+}
+
 function collectIncomingDataUrls(body: unknown): string[] {
   if (!body || typeof body !== "object") return [];
   const payload = body as Record<string, unknown>;
@@ -167,6 +182,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const moduleId = String(body?.moduleId || "").trim();
+    const learnerInstruction = String(body?.instruction || "").trim();
     const dataUrls = collectIncomingDataUrls(body);
 
     if (!moduleId) {
@@ -249,6 +265,10 @@ export async function POST(request: Request) {
       submittedAt: new Date().toISOString(),
     };
     const promptConfig = getExercisePromptConfig(moduleId);
+    const moduleMetadata = findModuleMetadata(moduleId);
+    const moduleTitle = moduleMetadata?.module.title || promptConfig.moduleTitle;
+    const moduleObjective = moduleMetadata?.module.objective || promptConfig.objective;
+    const exerciseTitle = moduleMetadata?.module.exercises?.[0] || promptConfig.exerciseTitle;
 
     const completedList = toNodeList(userRecord.completedNodes, []);
     const unlockedList = toNodeList(userRecord.unlockedNodes, ["0.1"]);
@@ -258,7 +278,12 @@ export async function POST(request: Request) {
       userName: userRecord.name,
       userEmail: userRecord.email,
       selectedSeed: userRecord.selectedSeed,
+      levelName: moduleMetadata?.levelName,
       moduleId,
+      moduleTitle,
+      moduleObjective,
+      exerciseTitle,
+      learnerInstruction,
       assetUrl: submission.imageUrl,
       assetKey: submission.storageKey,
       assetUrls: uploadedAssets.map((asset) => asset.url),
@@ -268,9 +293,10 @@ export async function POST(request: Request) {
       assetCount: uploadedAssets.length,
       submittedAt: submission.submittedAt,
       evaluationPrompt: promptConfig.prompt,
-      evaluationObjective: promptConfig.objective,
+      evaluationObjective: moduleObjective,
       evaluationChecklist: promptConfig.checklist,
       rejectionHints: promptConfig.rejectionHints,
+      expectedEvidence: promptConfig.expectedEvidence,
       expectedAssetCount: promptConfig.minAssets,
       xp: userRecord.xp,
       level: userRecord.level,

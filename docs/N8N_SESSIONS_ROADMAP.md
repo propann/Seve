@@ -1,6 +1,6 @@
 # N8N Sessions Roadmap (Systeme + Pedago)
 
-Derniere mise a jour: 2026-02-28
+Derniere mise a jour: 2026-03-08
 
 ## Objectif
 
@@ -66,6 +66,7 @@ Livrable workflow:
 
 - `n8n/workflows/pedago/seve-pedago-session-router.workflow.json`
 - `n8n/workflows/pedago/seve-pedago-aid-recommender.workflow.json`
+- `n8n/workflows/pedago/seve-pedago-exercise-review.workflow.json`
 
 ## Garde-fous progression (anti recommandations incoherentes)
 
@@ -80,13 +81,25 @@ Regles appliquees dans les workflows:
 
 ## Sequence de mise en place
 
-1. Importer les quatre workflows templates du dossier `n8n/workflows`.
+1. Importer les cinq workflows templates du dossier `n8n/workflows`.
 2. Configurer les chemins webhook definitifs (prod + staging).
 3. Ajouter authentification webhook (secret header ou token query).
 4. Brancher stockages cibles (Postgres, Airtable, Sheets, S3, etc.).
 5. Brancher IA pedagogique reelle sur la session pedago.
 6. Ajouter alerte erreur (Slack/Email) sur chaque workflow.
 7. Activer les workflows seulement apres tests payloads.
+
+## Etat reel verifie le 2026-03-08
+
+- La web app appelle bien `N8N_PEDAGO_EXERCISE_WEBHOOK_URL`.
+- La base Postgres est joignable depuis l hote.
+- Le stockage S3/MinIO est configure.
+- Le webhook prod `seve/pedago/exercise-review` retourne actuellement `404 not registered`.
+
+Implication:
+
+- le flux de correction exercice n est pas bloque par l app web
+- il est bloque cote instance n8n pedago, faute de workflow actif/publie
 
 ## Standards payload conseilles
 
